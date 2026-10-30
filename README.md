@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="Logo XM4 Control" width="128"></p>
+
 # XM4 Control
 
 Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony.
