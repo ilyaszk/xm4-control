@@ -19,10 +19,14 @@ pour le protocole et la publication d'une version.
 - Les pages de réglages sont créées par `NavigationView` : elles prennent leur DataContext dans `App.Current.ViewModel`.
 - H.NotifyIcon n'accepte en `IconSource` que des images chargées depuis une URI : l'icône passe par `Icon` (GDI).
 - Les `NavigationViewItem` de WPF-UI n'exposent aucun motif UI Automation cliquable.
+- Mémoire : popup et Réglages créés à la première ouverture, Réglages détruite à la fermeture ;
+  `MemoryTrimmer` rend la mémoire à Windows 10 s après que l'appli repasse en arrière-plan (~2 Mo au repos).
 
 ## Règles
 
 - Textes visibles (UI, CLI, messages d'erreur) et commentaires en français ; identifiants en anglais.
+- Ne pas réécrire les sources avec PowerShell 5.1 (`Get-Content`/`Set-Content`) : il lit l'UTF-8 sans BOM
+  comme de l'ANSI et abîme les accents.
 - Toute nouvelle commande ou tout nouveau décodage du protocole : test dans `tests/` avec des payloads
   réellement capturés (`xm4 raw <hex> -v`), et mise à jour du tableau du README.
 - Ne pas couper le profil mains libres (`xm4 mic off`) sans prévenir : ça coupe le micro du casque en cours d'appel.

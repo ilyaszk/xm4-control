@@ -20,6 +20,7 @@ public partial class App : Application
     private HeadsetController? _headset;
     private TaskbarIcon? _tray;
     private GlobalHotkey? _hotkey;
+    private readonly MemoryTrimmer _trimmer = new();
     private FlyoutWindow? _flyout;
     private SettingsWindow? _settingsWindow;
     private bool? _iconConnected;
@@ -28,7 +29,7 @@ public partial class App : Application
 
     internal MainViewModel ViewModel { get; private set; } = null!;
 
-    /// <summary>Vrai pendant la fermeture : les fenêtres se ferment au lieu de se cacher.</summary>
+    /// <summary>Vrai pendant la fermeture : le popup se ferme au lieu de se cacher.</summary>
     internal bool IsQuitting { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -65,9 +66,6 @@ public partial class App : Application
             message: $"{ViewModel.DeviceName} : {level} % restants.",
             icon: NotificationIcon.Warning);
 
-        _flyout = new FlyoutWindow(ViewModel);
-        _settingsWindow = new SettingsWindow(ViewModel);
-
         var menu = (ContextMenu)FindResource("TrayMenu");
         menu.DataContext = ViewModel;
         _tray = new TaskbarIcon
@@ -76,7 +74,7 @@ public partial class App : Application
             MenuActivation = PopupActivationMode.RightClick,
             ContextMenu = menu,
         };
-        _tray.TrayLeftMouseUp += (_, _) => _flyout.Toggle();
+        _tray.TrayLeftMouseUp += (_, _) => ToggleFlyout();
         UpdateTray();
         _tray.ForceCreate(enablesEfficiencyMode: false);
 
@@ -89,10 +87,38 @@ public partial class App : Application
             _showRequested, (_, _) => Dispatcher.BeginInvoke(() => ShowSettings()), null, Timeout.Infinite, executeOnlyOnce: false);
 
         // --tray : lancement au démarrage de Windows, sans ouvrir de fenêtre.
-        if (!e.Args.Contains("--tray")) ShowSettings();
+        if (e.Args.Contains("--tray")) _trimmer.Schedule();
+        else ShowSettings();
     }
 
-    internal void ShowSettings(Type? page = null) => _settingsWindow?.ShowPage(page);
+    // Les fenêtres ne sont créées qu'à leur première ouverture : en arrière-plan, l'appli n'a que l'icône.
+    private void ToggleFlyout()
+    {
+        if (_flyout is null)
+        {
+            _flyout = new FlyoutWindow(ViewModel);
+            _flyout.IsVisibleChanged += (_, _) =>
+            {
+                if (!_flyout.IsVisible) _trimmer.Schedule();
+            };
+        }
+        _flyout.Toggle();
+    }
+
+    // La fenêtre Réglages est détruite à sa fermeture, et recréée à la demande.
+    internal void ShowSettings(Type? page = null)
+    {
+        if (_settingsWindow is null)
+        {
+            _settingsWindow = new SettingsWindow(ViewModel);
+            _settingsWindow.Closed += (_, _) =>
+            {
+                _settingsWindow = null;
+                _trimmer.Schedule();
+            };
+        }
+        _settingsWindow.ShowPage(page);
+    }
 
     // Accent fixe, le bleu de l'icône : l'accent Windows peut être gris, et les éléments actifs
     // (mode sélectionné, interrupteurs) auraient l'air désactivés. Les nuances suivent le thème clair/sombre.
@@ -154,6 +180,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _trimmer.Stop();
         SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
         _showRegistration?.Unregister(null);
         _hotkey?.Dispose();

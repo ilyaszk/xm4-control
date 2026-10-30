@@ -35,14 +35,11 @@ public partial class SettingsWindow : FluentWindow
 
     private void Navigate(Type page) => _navigated = Navigation.Navigate(page) || _navigated;
 
+    // La fenêtre est vraiment fermée (l'appli reste dans la zone de notification et la recrée à la demande) :
+    // on détache le suivi du thème pour qu'elle puisse être libérée, tant que son handle existe encore.
     protected override void OnClosing(CancelEventArgs e)
     {
-        // Fermer la fenêtre la cache : l'appli reste dans la zone de notification.
-        if (!App.Current.IsQuitting)
-        {
-            e.Cancel = true;
-            Hide();
-        }
         base.OnClosing(e);
+        if (!e.Cancel && IsLoaded) SystemThemeWatcher.UnWatch(this);
     }
 }
