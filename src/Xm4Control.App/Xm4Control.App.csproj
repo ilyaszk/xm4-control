@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Xm4Control</AssemblyName>
+    <RootNamespace>Xm4Control.App</RootNamespace>
+    <!-- Mode sombre de WinForms (Application.SetColorMode), encore marqué expérimental. -->
+    <NoWarn>$(NoWarn);WFO5001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Xm4Control.Core\Xm4Control.Core.csproj" />
+  </ItemGroup>
+
+</Project>

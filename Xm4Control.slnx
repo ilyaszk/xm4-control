@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Xm4Control.App/Xm4Control.App.csproj" />
+    <Project Path="src/Xm4Control.Cli/Xm4Control.Cli.csproj" />
+    <Project Path="src/Xm4Control.Core/Xm4Control.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Xm4Control.Tests/Xm4Control.Tests.csproj" />
+  </Folder>
+</Solution>
