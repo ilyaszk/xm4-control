@@ -15,7 +15,7 @@ public partial class FlyoutWindow : FluentWindow
     {
         InitializeComponent();
         DataContext = viewModel;
-        Loaded += (_, _) => SystemThemeWatcher.Watch(this, WindowBackdropType.Mica, true);
+        Loaded += (_, _) => SystemThemeWatcher.Watch(this, WindowBackdropType.Mica, updateAccents: false);
         Deactivated += (_, _) => HideFlyout();
         SizeChanged += (_, _) => PlaceNearTray();
     }

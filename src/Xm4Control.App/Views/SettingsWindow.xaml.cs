@@ -17,7 +17,7 @@ public partial class SettingsWindow : FluentWindow
         DataContext = viewModel;
         Loaded += (_, _) =>
         {
-            SystemThemeWatcher.Watch(this, WindowBackdropType.Mica, true);
+            SystemThemeWatcher.Watch(this, WindowBackdropType.Mica, updateAccents: false);
             Navigate(_pendingPage);
         };
     }

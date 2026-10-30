@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
@@ -47,6 +48,8 @@ public partial class App : Application
         // Garde l'entrée de démarrage alignée sur l'exe lancé (s'il a été mis à jour ou déplacé).
         if (AppSettings.StartWithWindows) AppSettings.StartWithWindows = true;
         ApplicationThemeManager.ApplySystemTheme();
+        ApplyAccent(ApplicationThemeManager.GetAppTheme());
+        ApplicationThemeManager.Changed += (theme, _) => ApplyAccent(theme);
         if (SynchronizationContext.Current is null)
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher));
 
@@ -90,6 +93,11 @@ public partial class App : Application
     }
 
     internal void ShowSettings(Type? page = null) => _settingsWindow?.ShowPage(page);
+
+    // Accent fixe, le bleu de l'icône : l'accent Windows peut être gris, et les éléments actifs
+    // (mode sélectionné, interrupteurs) auraient l'air désactivés. Les nuances suivent le thème clair/sombre.
+    private static void ApplyAccent(ApplicationTheme theme) =>
+        ApplicationAccentColorManager.Apply(Color.FromRgb(0x00, 0x78, 0xD4), theme, false, false);
 
     internal void Quit()
     {

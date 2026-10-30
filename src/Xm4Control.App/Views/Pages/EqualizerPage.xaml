@@ -5,6 +5,7 @@
     xmlns:controls="clr-namespace:Xm4Control.App.Controls"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:views="clr-namespace:Xm4Control.App.Views"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Title="Égaliseur">
     <StackPanel Margin="24,12,24,24">
         <ui:TextBlock Margin="0,0,0,16" FontTypography="Title" Text="Égaliseur" />
