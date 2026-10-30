@@ -1,0 +1,112 @@
+<ui:FluentWindow
+    x:Class="Xm4Control.App.Views.FlyoutWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:protocol="clr-namespace:Xm4Control.Core.Protocol;assembly=Xm4Control.Core"
+    Title="XM4 Control"
+    Width="360"
+    ExtendsContentIntoTitleBar="True"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Topmost="True"
+    WindowBackdropType="Mica"
+    WindowCornerPreference="Round"
+    WindowStartupLocation="Manual">
+    <StackPanel Margin="16">
+        <!-- En-tête : casque, état, batterie -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ui:SymbolIcon Margin="0,0,12,0" FontSize="28" Symbol="Headphones24" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <ui:TextBlock FontTypography="BodyStrong" Text="{Binding DeviceName}" />
+                <TextBlock Style="{StaticResource Description}" Text="{Binding StatusText}" />
+            </StackPanel>
+            <StackPanel
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Visibility="{Binding HasBattery, Converter={StaticResource BoolToVisibility}}">
+                <ui:SymbolIcon FontSize="20" Symbol="{Binding BatterySymbol}" />
+                <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" Text="{Binding BatteryText}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Modes -->
+        <Grid Margin="0,16,-8,0" IsEnabled="{Binding IsConnected}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <ToggleButton CommandParameter="{x:Static protocol:AmbientMode.NoiseCancelling}" IsChecked="{Binding IsNoiseCancelling, Mode=OneWay}" Style="{StaticResource ModeTile}">
+                <StackPanel>
+                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="Headphones24" />
+                    <TextBlock Text="Réduction de bruit" TextAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton Grid.Column="1" CommandParameter="{x:Static protocol:AmbientMode.Ambient}" IsChecked="{Binding IsAmbient, Mode=OneWay}" Style="{StaticResource ModeTile}">
+                <StackPanel>
+                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="HeadphonesSoundWave24" />
+                    <TextBlock Text="Son ambiant" TextAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton Grid.Column="2" CommandParameter="{x:Static protocol:AmbientMode.Off}" IsChecked="{Binding IsOff, Mode=OneWay}" Style="{StaticResource ModeTile}">
+                <StackPanel>
+                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="Prohibited24" />
+                    <TextBlock Text="Désactivé" TextAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </ToggleButton>
+        </Grid>
+
+        <!-- Niveau du son ambiant -->
+        <ui:Card Margin="0,12,0,0" Padding="14,10" IsEnabled="{Binding IsAmbient}">
+            <StackPanel>
+                <Grid>
+                    <TextBlock Text="Niveau du son ambiant" />
+                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource Description}" Text="{Binding AmbientLevel}" />
+                </Grid>
+                <Slider
+                    Margin="0,6,0,4"
+                    IsSnapToTickEnabled="True"
+                    Maximum="20"
+                    Minimum="1"
+                    TickFrequency="1"
+                    Value="{Binding AmbientLevel, Delay=300}" />
+                <Grid>
+                    <TextBlock VerticalAlignment="Center" Text="Focus sur la voix" />
+                    <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding FocusOnVoice}" />
+                </Grid>
+            </StackPanel>
+        </ui:Card>
+
+        <!-- Micro -->
+        <ui:CardControl Margin="0,8,0,0" Padding="14,10" Icon="{ui:SymbolIcon Mic24}" IsEnabled="{Binding MicAvailable}">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="Micro du casque" />
+                    <TextBlock Style="{StaticResource Description}" Text="Coupé : stéréo HD en permanence" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:ToggleSwitch IsChecked="{Binding MicEnabled}" />
+        </ui:CardControl>
+
+        <TextBlock
+            Margin="2,8,0,0"
+            Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+            Text="{Binding Error}"
+            TextWrapping="Wrap"
+            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+
+        <!-- Pied : égaliseur et réglages -->
+        <Grid Margin="0,14,0,0">
+            <ui:Button Click="OnOpenEqualizer" Content="{Binding EqualizerLabel}" Icon="{ui:SymbolIcon DeviceEq24}" IsEnabled="{Binding IsConnected}" />
+            <ui:Button HorizontalAlignment="Right" Click="OnOpenSettings" Content="Réglages" Icon="{ui:SymbolIcon Settings24}" />
+        </Grid>
+    </StackPanel>
+</ui:FluentWindow>

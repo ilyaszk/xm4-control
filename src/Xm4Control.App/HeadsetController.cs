@@ -1,3 +1,5 @@
+using System.IO;
+using System.Windows.Threading;
 using Xm4Control.Core;
 using Xm4Control.Core.Bluetooth;
 using Xm4Control.Core.Protocol;
@@ -26,7 +28,7 @@ internal sealed class HeadsetController : IDisposable
     private readonly SynchronizationContext _ui;
     private readonly AppSettings _settings;
     private readonly TextWriter? _log;
-    private readonly System.Windows.Forms.Timer _timer = new() { Interval = 3000 };
+    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(3) };
     private Xm4Client? _client;
     private bool _polling;
     private DateTime _nextConnectAttempt;
@@ -256,7 +258,7 @@ internal sealed class HeadsetController : IDisposable
 
     public void Dispose()
     {
-        _timer.Dispose();
+        _timer.Stop();
         _client?.Dispose();
         _client = null;
     }

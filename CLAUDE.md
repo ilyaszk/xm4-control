@@ -1,7 +1,7 @@
 # xm4-control
 
-Appli Windows (WinForms, .NET 10) + CLI `xm4` pour piloter un Sony WH-1000XM4 en Bluetooth. Voir le README
-pour le protocole.
+Appli Windows (WPF, .NET 10) + CLI `xm4` pour piloter un Sony WH-1000XM4 en Bluetooth. Voir le README
+pour le protocole et la publication d'une version.
 
 ## Commandes
 
@@ -9,6 +9,16 @@ pour le protocole.
 - L'exe de l'appli verrouille sa sortie : arrêter `Xm4Control` (`Stop-Process -Name Xm4Control`) avant de recompiler.
 - Tester sur le vrai casque avec la CLI : `src/Xm4Control.Cli/bin/Debug/net10.0-windows/xm4.exe status -v`
   (l'appli ne doit pas tourner : une seule connexion RFCOMM à la fois).
+- Version : `Directory.Build.props`. Release : exe autonomes publiés dans `publish/` puis `gh release create`.
+
+## Appli
+
+- WPF-UI 4 (contrôles Windows 11, Mica, thème système) et H.NotifyIcon.Wpf (icône de notification).
+- `MainViewModel` relaie `HeadsetController` : ses setters envoient la commande, l'état réel revient par
+  `Changed`, qui rafraîchit toutes les liaisons (`PropertyChanged("")`).
+- Les pages de réglages sont créées par `NavigationView` : elles prennent leur DataContext dans `App.Current.ViewModel`.
+- H.NotifyIcon n'accepte en `IconSource` que des images chargées depuis une URI : l'icône passe par `Icon` (GDI).
+- Les `NavigationViewItem` de WPF-UI n'exposent aucun motif UI Automation cliquable.
 
 ## Règles
 

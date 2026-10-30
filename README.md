@@ -2,36 +2,38 @@
 
 Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony.
 
-- Réduction de bruit / son ambiant (niveau 1 à 20, focus sur la voix) / réduction du vent / désactivé
-- **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
-- Égaliseur : préréglages Sony + Clear Bass et 5 bandes
-- DSEE Extreme, Speak-to-Chat, pause au retrait du casque, pavé tactile, guide vocal
-- Batterie, codec (SBC/AAC/LDAC), firmware, extinction du casque
-- Icône dans la zone de notification avec menu rapide, lancement au démarrage de Windows
-- Outil en ligne de commande `xm4` pour les scripts et raccourcis
+<p>
+  <img src="docs/flyout.png" alt="Popup au-dessus de l'horloge" height="300">
+  <img src="docs/settings.png" alt="Fenêtre Réglages" height="300">
+</p>
+
+- **Popup au-dessus de l'horloge** : réduction de bruit / son ambiant / désactivé, niveau du son ambiant, micro, batterie
+- **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité
+  (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
+- **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli
+- **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris
+- DSEE Extreme, Speak-to-Chat, pause au retrait du casque, pavé tactile, guide vocal, réduction du vent
+- Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
+- Interface Windows 11 (Mica, thème clair/sombre et couleur d'accent du système)
+- Outil en ligne de commande `xm4` pour les scripts
 
 ## Installation
 
-Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`).
+Télécharger `Xm4Control.exe` dans les [Releases](https://github.com/ilyaszk/xm4-control/releases) et le lancer.
+Rien d'autre à installer : l'exe embarque .NET. Au premier lancement, Windows SmartScreen peut afficher
+« Windows a protégé votre ordinateur » (l'exe n'est pas signé) : *Informations complémentaires > Exécuter quand même*.
 
-```powershell
-dotnet publish src/Xm4Control.App -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish
-dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish
-```
-
-Puis lancer `publish\Xm4Control.exe`. Le casque doit être appairé dans les paramètres Bluetooth de Windows ;
-l'appli s'y connecte toute seule dès qu'il est allumé.
-
-Windows 11 range les nouvelles icônes dans la zone masquée (flèche `^`) : pour la garder visible,
-*Paramètres > Personnalisation > Barre des tâches > Autres icônes de la barre d'état système > XM4 Control*.
+Le casque doit être appairé dans *Paramètres > Bluetooth et appareils* ; l'appli s'y connecte toute seule dès
+qu'il est allumé. Windows 11 range les nouvelles icônes dans la zone masquée (flèche `^`) : pour garder celle-ci
+visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de la barre d'état système*.
 
 ## Utilisation
 
-**Appli** : clic gauche sur l'icône pour ouvrir la fenêtre, clic droit pour le menu rapide (modes, micro, quitter).
-Fermer la fenêtre la cache seulement. `Xm4Control.exe --log` écrit les trames échangées dans
-`%LOCALAPPDATA%\Xm4Control\trace.log`.
+- **Clic gauche** sur l'icône : popup rapide. **Clic droit** : menu (modes, micro, réglages, quitter).
+- La fenêtre Réglages se cache quand on la ferme ; l'appli reste dans la zone de notification.
+- `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
 
-**Ligne de commande** :
+**Ligne de commande** (`xm4.exe`, aussi dans les Releases) :
 
 ```text
 xm4 status                 état du casque
@@ -110,16 +112,32 @@ Si Windows le réactive (réappairage…), l'appli le recoupe à la connexion su
 - [omarchy-headphones, PROTOCOL.md](https://raw.githubusercontent.com/ncr/omarchy-headphones/main/PROTOCOL.md) :
   captures sur un WH-1000XM4
 
-## Structure
+## Développement
 
 ```text
 src/Xm4Control.Core   protocole (trames, commandes, décodage), Bluetooth Win32, client RFCOMM
-src/Xm4Control.App    appli WinForms (zone de notification + fenêtre)
+src/Xm4Control.App    appli WPF (WPF-UI pour les contrôles Windows 11, H.NotifyIcon pour l'icône)
 src/Xm4Control.Cli    outil xm4
 tests/                tests du protocole sur des trames capturées
 ```
+
+Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`).
 
 ```powershell
 dotnet build
 dotnet test
 ```
+
+Publier une version (exe autonomes, la version est dans `Directory.Build.props`) :
+
+```powershell
+foreach ($p in 'src/Xm4Control.App', 'src/Xm4Control.Cli') {
+  dotnet publish $p -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
+    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+}
+gh release create v1.0.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 1.0.0" --notes "..."
+```
+
+## Licence
+
+[MIT](LICENSE). Projet indépendant, non affilié à Sony.

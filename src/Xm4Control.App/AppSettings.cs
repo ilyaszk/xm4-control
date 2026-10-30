@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json;
 using Microsoft.Win32;
 
@@ -17,6 +18,12 @@ internal sealed class AppSettings
 
     /// <summary>Choix de l'utilisateur, réappliqué à chaque connexion si Windows a réactivé le profil.</summary>
     public bool MicDisabled { get; set; }
+
+    /// <summary>Raccourci global Ctrl+Alt+N pour passer d'un mode à l'autre.</summary>
+    public bool HotkeyEnabled { get; set; } = true;
+
+    /// <summary>Notification quand la batterie du casque passe sous 20 %.</summary>
+    public bool LowBatteryAlert { get; set; } = true;
 
     public static AppSettings Load()
     {

@@ -1,0 +1,68 @@
+<Page
+    x:Class="Xm4Control.App.Views.Pages.AppPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Application">
+    <StackPanel Margin="24,12,24,24">
+        <ui:TextBlock Margin="0,0,0,16" FontTypography="Title" Text="Application" />
+
+        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon Rocket24}">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="Lancer au démarrage de Windows" />
+                    <TextBlock Style="{StaticResource Description}" Text="L'appli démarre dans la zone de notification, sans fenêtre." />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:ToggleSwitch IsChecked="{Binding StartWithWindows}" />
+        </ui:CardControl>
+
+        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon Keyboard24}">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="Raccourci clavier Ctrl + Alt + N" />
+                    <TextBlock Style="{StaticResource Description}" Text="Depuis n'importe quelle appli : réduction de bruit → son ambiant → désactivé." />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                        Text="{Binding HotkeyError}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding HasHotkeyError, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:ToggleSwitch IsChecked="{Binding HotkeyEnabled}" />
+        </ui:CardControl>
+
+        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon BatteryWarning24}">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="Alerte batterie faible" />
+                    <TextBlock Style="{StaticResource Description}" Text="Notification Windows quand la batterie du casque passe sous 20 %." />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:ToggleSwitch IsChecked="{Binding LowBatteryAlert}" />
+        </ui:CardControl>
+
+        <ui:TextBlock Margin="0,24,0,8" FontTypography="BodyStrong" Text="À propos" />
+        <ui:Card Padding="16,12">
+            <StackPanel>
+                <TextBlock>
+                    <Run FontWeight="SemiBold" Text="XM4 Control" />
+                    <Run Text="{Binding Version, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0" Style="{StaticResource Description}" Text="Contrôle du Sony WH-1000XM4 sous Windows, sans l'appli mobile. Logiciel libre sous licence MIT, non affilié à Sony." />
+                <ui:HyperlinkButton
+                    Margin="-10,6,0,0"
+                    Content="Code source sur GitHub"
+                    Icon="{ui:SymbolIcon Code24}"
+                    NavigateUri="https://github.com/ilyaszk/xm4-control" />
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Button
+            Margin="0,20,0,0"
+            Click="OnQuit"
+            Content="Quitter XM4 Control"
+            Icon="{ui:SymbolIcon SignOut24}" />
+    </StackPanel>
+</Page>

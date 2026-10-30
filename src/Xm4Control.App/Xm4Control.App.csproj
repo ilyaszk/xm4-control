@@ -1,16 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Xm4Control</AssemblyName>
     <RootNamespace>Xm4Control.App</RootNamespace>
-    <!-- Mode sombre de WinForms (Application.SetColorMode), encore marqué expérimental. -->
-    <NoWarn>$(NoWarn);WFO5001</NoWarn>
+    <ApplicationIcon>Assets/app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Xm4Control.Core\Xm4Control.Core.csproj" />

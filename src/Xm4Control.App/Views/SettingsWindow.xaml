@@ -1,0 +1,39 @@
+<ui:FluentWindow
+    x:Class="Xm4Control.App.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:pages="clr-namespace:Xm4Control.App.Views.Pages"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="XM4 Control"
+    Width="860"
+    Height="640"
+    MinWidth="720"
+    MinHeight="480"
+    ExtendsContentIntoTitleBar="True"
+    WindowBackdropType="Mica"
+    WindowCornerPreference="Round"
+    WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Title="XM4 Control" Icon="{ui:SymbolIcon Headphones24}" />
+
+        <ui:NavigationView
+            x:Name="Navigation"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="False"
+            OpenPaneLength="210"
+            PaneDisplayMode="Left">
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Son ambiant" Icon="{ui:SymbolIcon HeadphonesSoundWave24}" TargetPageType="{x:Type pages:SoundPage}" />
+                <ui:NavigationViewItem Content="Égaliseur" Icon="{ui:SymbolIcon DeviceEq24}" TargetPageType="{x:Type pages:EqualizerPage}" />
+                <ui:NavigationViewItem Content="Casque" Icon="{ui:SymbolIcon Headphones24}" TargetPageType="{x:Type pages:HeadsetPage}" />
+                <ui:NavigationViewItem Content="Application" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:AppPage}" />
+            </ui:NavigationView.MenuItems>
+        </ui:NavigationView>
+    </Grid>
+</ui:FluentWindow>

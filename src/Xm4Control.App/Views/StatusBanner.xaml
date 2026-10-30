@@ -1,0 +1,23 @@
+<UserControl
+    x:Class="Xm4Control.App.Views.StatusBanner"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <!-- Bandeaux "casque non connecté" et "erreur", en tête de chaque page de réglages. -->
+    <StackPanel>
+        <ui:InfoBar
+            Margin="0,0,0,12"
+            IsClosable="False"
+            IsOpen="{Binding ShowDisconnected, Mode=OneWay}"
+            Message="{Binding DisconnectedHint}"
+            Severity="Warning"
+            Title="{Binding StatusText}" />
+        <ui:InfoBar
+            Margin="0,0,0,12"
+            IsClosable="False"
+            IsOpen="{Binding HasError, Mode=OneWay}"
+            Message="{Binding Error}"
+            Severity="Error"
+            Title="Erreur" />
+    </StackPanel>
+</UserControl>
