@@ -75,9 +75,60 @@ public class ProtocolTests
     public void Parse_Settings()
     {
         Assert.True(Parse(MessageType.Command1, "F7030001").PauseWhenTakenOff);
-        Assert.False(Parse(MessageType.Command1, "D7D20100").TouchSensor);
         Assert.False(Parse(MessageType.Command1, "E7020000").Dsee);
         Assert.True(Parse(MessageType.Command2, "47010101").VoiceGuidance);
+    }
+
+    [Theory]
+    [InlineData("D7D10101", true)]   // GET : pavé tactile actif
+    [InlineData("D9D10100", false)]  // notification après SET D8 D1 01 00
+    public void Parse_TouchSensor(string hex, bool expected)
+    {
+        Assert.Equal(expected, Parse(MessageType.Command1, hex).TouchSensor);
+    }
+
+    [Fact]
+    public void Parse_TouchSensor_IgnoresSetting2()
+    {
+        // 0xD2 n'existe pas sur le XM4 (pas de réponse à D0 D2), même s'il répond D7 D2 01 00.
+        Assert.Null(Parse(MessageType.Command1, "D7D20100").TouchSensor);
+    }
+
+    [Theory]
+    [InlineData("F704011000", true)]
+    [InlineData("F904011100", false)]
+    public void Parse_AutoPowerOff(string hex, bool expected)
+    {
+        Assert.Equal(expected, Parse(MessageType.Command1, hex).AutoPowerOff);
+    }
+
+    [Fact]
+    public void Parse_SpeakToChatConfig()
+    {
+        var config = Parse(MessageType.Command1, "FB0500000001").SpeakToChatConfig;
+
+        Assert.Equal(new SpeakToChatConfig(SpeakToChatSensitivity.Auto, false, SpeakToChatTimeout.Standard), config);
+    }
+
+    [Theory]
+    [InlineData("85010001", NcOptimizerStatus.CheckingFit)]
+    [InlineData("85010010", NcOptimizerStatus.Analyzing)]
+    [InlineData("85010011", NcOptimizerStatus.Finished)]
+    public void Parse_NcOptimizerStatus(string hex, NcOptimizerStatus expected)
+    {
+        Assert.Equal(expected, Parse(MessageType.Command1, hex).NcOptimizer);
+    }
+
+    [Fact]
+    public void SettingsCommands_Payloads()
+    {
+        Assert.Equal("D6D1", Convert.ToHexString(Commands.GetTouchSensor().Payload));
+        Assert.Equal("D8D10100", Convert.ToHexString(Commands.SetTouchSensor(false).Payload));
+        Assert.Equal("F804011000", Convert.ToHexString(Commands.SetAutoPowerOff(true).Payload));
+        Assert.Equal("F804011100", Convert.ToHexString(Commands.SetAutoPowerOff(false).Payload));
+        Assert.Equal("FC0500020103", Convert.ToHexString(Commands.SetSpeakToChatConfig(
+            new SpeakToChatConfig(SpeakToChatSensitivity.Low, true, SpeakToChatTimeout.Off)).Payload));
+        Assert.Equal("84010001", Convert.ToHexString(Commands.StartNcOptimizer(true).Payload));
     }
 
     [Fact]

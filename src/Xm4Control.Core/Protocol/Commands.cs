@@ -27,6 +27,34 @@ public enum EqPreset : byte
 /// <param name="Level">Niveau du son ambiant, de 1 à 20.</param>
 public readonly record struct AmbientSettings(AmbientMode Mode, int Level, bool FocusOnVoice);
 
+public enum SpeakToChatSensitivity : byte
+{
+    Auto = 0x00,
+    High = 0x01,
+    Low = 0x02,
+}
+
+/// <summary>Délai sans parole avant que Speak-to-Chat rende la musique.</summary>
+public enum SpeakToChatTimeout : byte
+{
+    Short = 0x00,
+    Standard = 0x01,
+    Long = 0x02,
+    Off = 0x03,
+}
+
+public readonly record struct SpeakToChatConfig(SpeakToChatSensitivity Sensitivity, bool VoiceFocus, SpeakToChatTimeout Timeout);
+
+/// <summary>Étapes de l'optimiseur de réduction de bruit, notifiées par le casque.</summary>
+public enum NcOptimizerStatus : byte
+{
+    NotRunning = 0x00,
+    CheckingFit = 0x01,
+    MeasuringPressure = 0x02,
+    Analyzing = 0x10,
+    Finished = 0x11,
+}
+
 public sealed record Request(MessageType Type, byte[] Payload)
 {
     public override string ToString() => $"{Type} [{Convert.ToHexString(Payload)}]";
@@ -92,14 +120,27 @@ public static class Commands
     public static Request GetDsee() => C1(0xE6, 0x02);
     public static Request SetDsee(bool on) => C1(0xE8, 0x02, 0x00, B(on));
 
-    public static Request GetTouchSensor() => C1(0xD6, 0xD2);
-    public static Request SetTouchSensor(bool on) => C1(0xD8, 0xD2, 0x01, B(on));
+    // Réglage général n° 1 (0xD1) : le XM4 le nomme TOUCH_PANEL_SETTING (réponse à D0 D1).
+    // Gadgetbridge utilise 0xD2, que le XM4 n'expose pas.
+    public static Request GetTouchSensor() => C1(0xD6, 0xD1);
+    public static Request SetTouchSensor(bool on) => C1(0xD8, 0xD1, 0x01, B(on));
 
     public static Request GetPauseWhenTakenOff() => C1(0xF6, 0x03);
     public static Request SetPauseWhenTakenOff(bool on) => C1(0xF8, 0x03, 0x00, B(on));
 
+    /// <summary>Extinction quand le casque n'est plus porté (10 00) ou jamais (11 00).</summary>
+    public static Request GetAutoPowerOff() => C1(0xF6, 0x04);
+    public static Request SetAutoPowerOff(bool whenTakenOff) => C1(0xF8, 0x04, 0x01, (byte)(whenTakenOff ? 0x10 : 0x11), 0x00);
+
     public static Request GetSpeakToChat() => C1(0xF6, 0x05);
     public static Request SetSpeakToChat(bool on) => C1(0xF8, 0x05, 0x01, B(on));
+
+    public static Request GetSpeakToChatConfig() => C1(0xFA, 0x05);
+    public static Request SetSpeakToChatConfig(SpeakToChatConfig c) =>
+        C1(0xFC, 0x05, 0x00, (byte)c.Sensitivity, B(c.VoiceFocus), (byte)c.Timeout);
+
+    /// <summary>Lance (ou arrête) l'optimiseur ; sa progression arrive en notifications 0x85.</summary>
+    public static Request StartNcOptimizer(bool start) => C1(0x84, 0x01, 0x00, B(start));
 
     public static Request GetVoiceGuidance() => C2(0x46, 0x01, 0x01);
     public static Request SetVoiceGuidance(bool on) => C2(0x48, 0x01, 0x01, B(on));
@@ -114,7 +155,9 @@ public static class Commands
         GetEqualizer(),
         GetDsee(),
         GetSpeakToChat(),
+        GetSpeakToChatConfig(),
         GetPauseWhenTakenOff(),
+        GetAutoPowerOff(),
         GetTouchSensor(),
         GetVoiceGuidance(),
     ];

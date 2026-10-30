@@ -1,27 +1,17 @@
-using System.Windows;
-using System.Windows.Controls;
-using Wpf.Ui.Controls;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Xm4Control.App.Views.Pages;
 
-public partial class HeadsetPage : Page
+public sealed partial class HeadsetPage : Page
 {
-    public HeadsetPage()
-    {
-        InitializeComponent();
-        DataContext = App.Current.ViewModel;
-    }
+    public HeadsetPage() => InitializeComponent();
+
+    internal MainViewModel ViewModel => App.Current.ViewModel;
 
     private async void OnPowerOff(object sender, RoutedEventArgs e)
     {
-        var confirm = new Wpf.Ui.Controls.MessageBox
-        {
-            Title = "Éteindre le casque",
-            Content = "Le casque va s'éteindre. Il faudra le rallumer avec son bouton.",
-            PrimaryButtonText = "Éteindre",
-            CloseButtonText = "Annuler",
-        };
-        if (await confirm.ShowDialogAsync() == Wpf.Ui.Controls.MessageBoxResult.Primary)
-            await App.Current.ViewModel.PowerOffAsync();
+        if (await Ui.ConfirmAsync(XamlRoot, "Éteindre le casque", "Le casque va s'éteindre. Il faudra le rallumer avec son bouton.", "Éteindre"))
+            await ViewModel.PowerOffAsync();
     }
 }

@@ -1,7 +1,5 @@
 using System.Runtime;
 using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace Xm4Control.App;
 
@@ -10,30 +8,44 @@ namespace Xm4Control.App;
 /// qui restitue les segments libres, puis vidage de la plage de travail. Les pages encore utiles
 /// reviennent à la demande.
 /// </summary>
-internal sealed class MemoryTrimmer
+internal sealed class MemoryTrimmer(Func<bool> isAnyWindowVisible)
 {
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(10) };
+    // Deuxième passage : après la fermeture d'une fenêtre, WinUI libère ses ressources en différé et
+    // la mémoire remonte d'une vingtaine de Mo dans les secondes qui suivent le premier nettoyage.
+    private static readonly TimeSpan[] Delays = [TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(50)];
+    private CancellationTokenSource? _pending;
 
-    public MemoryTrimmer() => _timer.Tick += (_, _) =>
-    {
-        _timer.Stop();
-        Trim();
-    };
-
-    /// <summary>Planifie un nettoyage dans 10 s ; chaque appel repousse l'échéance.</summary>
+    /// <summary>Planifie un nettoyage dans 10 s puis un autre une minute après ; chaque appel repousse l'échéance.</summary>
     public void Schedule()
     {
-        _timer.Stop();
-        _timer.Start();
+        _pending?.Cancel();
+        var pending = _pending = new CancellationTokenSource();
+        _ = TrimLaterAsync(pending.Token);
     }
 
-    public void Stop() => _timer.Stop();
+    public void Stop() => _pending?.Cancel();
+
+    private async Task TrimLaterAsync(CancellationToken ct)
+    {
+        foreach (var delay in Delays)
+        {
+            try
+            {
+                await Task.Delay(delay, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            // Pas pendant qu'une fenêtre est affichée : on la ralentirait pour rien.
+            if (isAnyWindowVisible()) return;
+            Trim();
+        }
+    }
 
     private static void Trim()
     {
-        // Pas pendant qu'une fenêtre est affichée : on la ralentirait pour rien.
-        if (Application.Current.Windows.Cast<Window>().Any(w => w.IsVisible)) return;
-
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
         GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
         GC.WaitForPendingFinalizers();

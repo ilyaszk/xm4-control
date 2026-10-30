@@ -70,6 +70,9 @@ try
         case "pause":
             await client.SetPauseWhenTakenOffAsync(Require(on));
             break;
+        case "autooff":
+            await client.SetAutoPowerOffAsync(Require(on));
+            break;
         case "touch":
             await client.SetTouchSensorAsync(Require(on));
             break;
@@ -91,7 +94,7 @@ try
     }
 
     // Laisse le temps aux dernières notifications d'arriver.
-    await Task.Delay(300);
+    await Task.Delay(args[0] is "raw" or "raw2" ? 1500 : 300);
     PrintState(device, client.State);
     return 0;
 }
@@ -142,7 +145,10 @@ static void PrintState(PairedDevice device, Xm4State s)
         Console.WriteLine($"  Égaliseur      : {Labels.Of(eq)}{(s.EqBands is { } bands ? $" [{string.Join(" ", bands)}]" : "")}");
     Console.WriteLine($"  DSEE Extreme   : {YesNo(s.Dsee)}");
     Console.WriteLine($"  Speak-to-Chat  : {YesNo(s.SpeakToChat)}");
+    if (s.SpeakToChatConfig is { } c)
+        Console.WriteLine($"    sensibilité {Labels.Of(c.Sensitivity).ToLowerInvariant()}, fin {Labels.Of(c.Timeout).ToLowerInvariant()}{(c.VoiceFocus ? ", focus voix" : "")}");
     Console.WriteLine($"  Pause au retrait : {YesNo(s.PauseWhenTakenOff)}");
+    Console.WriteLine($"  Extinction auto : {YesNo(s.AutoPowerOff)}");
     Console.WriteLine($"  Pavé tactile   : {YesNo(s.TouchSensor)}");
     Console.WriteLine($"  Guide vocal    : {YesNo(s.VoiceGuidance)}");
 }
@@ -157,8 +163,9 @@ static void PrintUsage() => Console.WriteLine("""
       xm4 off                    ni réduction de bruit ni son ambiant
       xm4 eq <préréglage>        Off, Bright, Excited, Mellow, Relaxed, Vocal,
                                  TrebleBoost, BassBoost, Speech, Manual, Custom1, Custom2
-      xm4 dsee|s2c|pause|touch|voice on|off
+      xm4 dsee|s2c|pause|autooff|touch|voice on|off
                                  DSEE Extreme, Speak-to-Chat, pause au retrait,
+                                 extinction quand on ne le porte plus,
                                  pavé tactile, guide vocal
       xm4 mic [on|off]           profil mains libres Windows (off = stéréo sans micro)
       xm4 poweroff               éteint le casque

@@ -1,45 +1,52 @@
-using System.ComponentModel;
-using System.Windows;
-using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Windows.Graphics;
 using Xm4Control.App.Views.Pages;
 
 namespace Xm4Control.App.Views;
 
-public partial class SettingsWindow : FluentWindow
+/// <summary>Fenêtre de réglages ; détruite à la fermeture, l'appli la recrée à la demande.</summary>
+public sealed partial class SettingsWindow : Window
 {
-    private Type _pendingPage = typeof(SoundPage);
-    private bool _navigated;
+    private static readonly Type[] Pages = [typeof(SoundPage), typeof(EqualizerPage), typeof(HeadsetPage), typeof(AppPage)];
 
     internal SettingsWindow(MainViewModel viewModel)
     {
         InitializeComponent();
-        DataContext = viewModel;
-        Loaded += (_, _) =>
-        {
-            SystemThemeWatcher.Watch(this, WindowBackdropType.Mica, updateAccents: false);
-            Navigate(_pendingPage);
-        };
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+        AppWindow.SetIcon(Ui.IconPath);
+        // Appli non empaquetée : chemin absolu plutôt qu'une URI ms-appx.
+        AppTitleBar.IconSource = new ImageIconSource { ImageSource = new BitmapImage(new Uri(Ui.IconPath)) };
+        if (AppWindow.Presenter is OverlappedPresenter presenter) presenter.PreferredMinimumWidth = 760;
+
+        var scale = Ui.Scale(this);
+        var size = new SizeInt32((int)(900 * scale), (int)(700 * scale));
+        var area = DisplayArea.Primary.WorkArea;
+        AppWindow.MoveAndResize(new RectInt32(
+            area.X + (area.Width - size.Width) / 2,
+            area.Y + (area.Height - size.Height) / 2,
+            size.Width,
+            size.Height));
     }
 
-    /// <summary>Affiche la fenêtre, sur la page demandée ou la dernière consultée.</summary>
+    /// <summary>Affiche la fenêtre, sur la page demandée ou la première.</summary>
     public void ShowPage(Type? page)
     {
-        if (page is not null) _pendingPage = page;
-        Show();
-        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        var index = page is null ? -1 : Array.IndexOf(Pages, page);
+        if (index >= 0 || Navigation.SelectedItem is null)
+            Navigation.SelectedItem = Navigation.MenuItems[Math.Max(index, 0)];
         Activate();
-        // Avant le premier Loaded, le modèle de NavigationView n'est pas encore appliqué.
-        if (IsLoaded && (page is not null || !_navigated)) Navigate(_pendingPage);
+        Ui.BringToFront(this);
     }
 
-    private void Navigate(Type page) => _navigated = Navigation.Navigate(page) || _navigated;
-
-    // La fenêtre est vraiment fermée (l'appli reste dans la zone de notification et la recrée à la demande) :
-    // on détache le suivi du thème pour qu'elle puisse être libérée, tant que son handle existe encore.
-    protected override void OnClosing(CancelEventArgs e)
+    private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        base.OnClosing(e);
-        if (!e.Cancel && IsLoaded) SystemThemeWatcher.UnWatch(this);
+        var index = sender.MenuItems.IndexOf(args.SelectedItem);
+        if (index < 0 || ContentFrame.CurrentSourcePageType == Pages[index]) return;
+        ContentFrame.Navigate(Pages[index], null, new EntranceNavigationTransitionInfo());
     }
 }

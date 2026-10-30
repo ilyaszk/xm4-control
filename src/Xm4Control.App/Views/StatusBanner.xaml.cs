@@ -1,8 +1,10 @@
-using System.Windows.Controls;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Xm4Control.App.Views;
 
-public partial class StatusBanner : UserControl
+public sealed partial class StatusBanner : UserControl
 {
     public StatusBanner() => InitializeComponent();
+
+    internal MainViewModel ViewModel => App.Current.ViewModel;
 }

@@ -1,8 +1,14 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Win32;
 
 namespace Xm4Control.App;
+
+// Sérialisation générée à la compilation : l'exe publié est élagué (trimming), sans réflexion.
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(AppSettings))]
+internal sealed partial class SettingsJson : JsonSerializerContext;
 
 internal sealed class AppSettings
 {
@@ -29,7 +35,7 @@ internal sealed class AppSettings
     {
         try
         {
-            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath)) ?? new();
+            return JsonSerializer.Deserialize(File.ReadAllText(FilePath), SettingsJson.Default.AppSettings) ?? new();
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -40,7 +46,7 @@ internal sealed class AppSettings
     public void Save()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, SettingsJson.Default.AppSettings));
     }
 
     public static bool StartWithWindows

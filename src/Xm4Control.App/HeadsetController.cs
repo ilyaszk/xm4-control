@@ -1,12 +1,11 @@
 using System.IO;
-using System.Windows.Threading;
 using Xm4Control.Core;
 using Xm4Control.Core.Bluetooth;
 using Xm4Control.Core.Protocol;
 
 namespace Xm4Control.App;
 
-internal enum ConnectionStatus
+public enum ConnectionStatus
 {
     Searching,
     NoDevice,
@@ -28,7 +27,7 @@ internal sealed class HeadsetController : IDisposable
     private readonly SynchronizationContext _ui;
     private readonly AppSettings _settings;
     private readonly TextWriter? _log;
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(3) };
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(3));
     private Xm4Client? _client;
     private bool _polling;
     private DateTime _nextConnectAttempt;
@@ -39,9 +38,14 @@ internal sealed class HeadsetController : IDisposable
         _ui = SynchronizationContext.Current ?? throw new InvalidOperationException("Doit être créé sur le thread UI.");
         _settings = settings;
         _log = log;
-        _timer.Tick += async (_, _) => await PollAsync();
-        _timer.Start();
-        _ = PollAsync();
+        _ = PollLoopAsync();
+    }
+
+    // Les continuations reviennent sur le contexte UI capturé : pas besoin de minuterie propre au framework.
+    private async Task PollLoopAsync()
+    {
+        await PollAsync();
+        while (await _timer.WaitForNextTickAsync()) await PollAsync();
     }
 
     public event Action? Changed;
@@ -258,7 +262,7 @@ internal sealed class HeadsetController : IDisposable
 
     public void Dispose()
     {
-        _timer.Stop();
+        _timer.Dispose();
         _client?.Dispose();
         _client = null;
     }

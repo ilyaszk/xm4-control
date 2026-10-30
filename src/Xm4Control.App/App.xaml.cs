@@ -1,29 +1,44 @@
 using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Input;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
-using Microsoft.Win32;
-using Wpf.Ui.Appearance;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Windows.UI.ViewManagement;
 using Xm4Control.App.Views;
+using Xm4Control.Core;
+using Xm4Control.Core.Protocol;
 
 namespace Xm4Control.App;
 
 /// <summary>Application résidente : icône de notification, popup rapide et fenêtre de réglages.</summary>
 public partial class App : Application
 {
-    private EventWaitHandle? _showRequested;
+    private readonly EventWaitHandle _showRequested;
+    private readonly string[] _args;
+    private readonly MemoryTrimmer _trimmer;
+    private readonly UISettings _uiSettings = new();
+    private DispatcherQueue _dispatcher = null!;
     private RegisteredWaitHandle? _showRegistration;
     private TextWriter? _log;
     private HeadsetController? _headset;
     private TaskbarIcon? _tray;
+    private TrayMenu? _menu;
     private GlobalHotkey? _hotkey;
-    private readonly MemoryTrimmer _trimmer = new();
     private FlyoutWindow? _flyout;
     private SettingsWindow? _settingsWindow;
     private bool? _iconConnected;
+
+    internal App(EventWaitHandle showRequested, string[] args)
+    {
+        _showRequested = showRequested;
+        _args = args;
+        _trimmer = new MemoryTrimmer(() => _flyout?.IsShown == true || _settingsWindow is not null);
+        InitializeComponent();
+        // L'appli vit dans la zone de notification : fermer la dernière fenêtre ne doit pas la quitter.
+        DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
+    }
 
     internal static new App Current => (App)Application.Current;
 
@@ -32,30 +47,15 @@ public partial class App : Application
     /// <summary>Vrai pendant la fermeture : le popup se ferme au lieu de se cacher.</summary>
     internal bool IsQuitting { get; private set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
-        base.OnStartup(e);
-
-        _showRequested = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\Xm4Control.Show", out var firstInstance);
-        if (!firstInstance)
-        {
-            // Une instance tourne déjà : on lui demande d'afficher ses réglages.
-            _showRequested.Set();
-            IsQuitting = true;
-            Shutdown();
-            return;
-        }
+        _dispatcher = DispatcherQueue.GetForCurrentThread();
 
         // Garde l'entrée de démarrage alignée sur l'exe lancé (s'il a été mis à jour ou déplacé).
         if (AppSettings.StartWithWindows) AppSettings.StartWithWindows = true;
-        ApplicationThemeManager.ApplySystemTheme();
-        ApplyAccent(ApplicationThemeManager.GetAppTheme());
-        ApplicationThemeManager.Changed += (theme, _) => ApplyAccent(theme);
-        if (SynchronizationContext.Current is null)
-            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher));
 
         // --log : trace des trames échangées avec le casque, pour le débogage.
-        _log = e.Args.Contains("--log") ? OpenLog() : null;
+        _log = _args.Contains("--log") ? OpenLog() : null;
         var settings = AppSettings.Load();
         _headset = new HeadsetController(settings, _log);
         ViewModel = new MainViewModel(_headset, settings);
@@ -66,28 +66,25 @@ public partial class App : Application
             message: $"{ViewModel.DeviceName} : {level} % restants.",
             icon: NotificationIcon.Warning);
 
-        var menu = (ContextMenu)FindResource("TrayMenu");
-        menu.DataContext = ViewModel;
-        _tray = new TaskbarIcon
-        {
-            NoLeftClickDelay = true,
-            MenuActivation = PopupActivationMode.RightClick,
-            ContextMenu = menu,
-        };
-        _tray.TrayLeftMouseUp += (_, _) => ToggleFlyout();
-        UpdateTray();
-        _tray.ForceCreate(enablesEfficiencyMode: false);
+        Ui.FollowSystemThemeInMenus();
+        CreateTray();
 
         _hotkey = new GlobalHotkey();
         _hotkey.Pressed += () => _ = ViewModel.CycleModeAsync();
         ApplyHotkeySetting();
 
-        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        // Thème clair/sombre de la barre des tâches changé : on redessine l'icône (événement hors thread UI).
+        _uiSettings.ColorValuesChanged += (_, _) => _dispatcher.TryEnqueue(() =>
+        {
+            _iconConnected = null;
+            UpdateTray();
+        });
+
         _showRegistration = ThreadPool.RegisterWaitForSingleObject(
-            _showRequested, (_, _) => Dispatcher.BeginInvoke(() => ShowSettings()), null, Timeout.Infinite, executeOnlyOnce: false);
+            _showRequested, (_, _) => _dispatcher.TryEnqueue(() => ShowSettings()), null, Timeout.Infinite, executeOnlyOnce: false);
 
         // --tray : lancement au démarrage de Windows, sans ouvrir de fenêtre.
-        if (e.Args.Contains("--tray")) _trimmer.Schedule();
+        if (_args.Contains("--tray")) _trimmer.Schedule();
         else ShowSettings();
     }
 
@@ -97,10 +94,7 @@ public partial class App : Application
         if (_flyout is null)
         {
             _flyout = new FlyoutWindow(ViewModel);
-            _flyout.IsVisibleChanged += (_, _) =>
-            {
-                if (!_flyout.IsVisible) _trimmer.Schedule();
-            };
+            _flyout.Hidden += _trimmer.Schedule;
         }
         _flyout.Toggle();
     }
@@ -120,39 +114,41 @@ public partial class App : Application
         _settingsWindow.ShowPage(page);
     }
 
-    // Accent fixe, le bleu de l'icône : l'accent Windows peut être gris, et les éléments actifs
-    // (mode sélectionné, interrupteurs) auraient l'air désactivés. Les nuances suivent le thème clair/sombre.
-    private static void ApplyAccent(ApplicationTheme theme) =>
-        ApplicationAccentColorManager.Apply(Color.FromRgb(0x00, 0x78, 0xD4), theme, false, false);
-
     internal void Quit()
     {
         IsQuitting = true;
-        Shutdown();
+        _trimmer.Stop();
+        _showRegistration?.Unregister(null);
+        _hotkey?.Dispose();
+        _tray?.Dispose();
+        _headset?.Dispose();
+        _log?.Dispose();
+        _showRequested.Dispose();
+        _settingsWindow?.Close();
+        _flyout?.Close();
+        Exit();
     }
 
-    private void OnOpenSettings(object sender, RoutedEventArgs e) => ShowSettings();
-
-    private void OnQuit(object sender, RoutedEventArgs e) => Quit();
-
-    private void ApplyHotkeySetting()
+    private void CreateTray()
     {
-        if (_hotkey is null) return;
-        if (ViewModel.HotkeyEnabled)
+        _menu = new TrayMenu(this);
+        _tray = new TaskbarIcon
         {
-            ViewModel.HotkeyError = _hotkey.Register() ? null : $"{GlobalHotkey.Label} est déjà utilisé par une autre application.";
-        }
-        else
-        {
-            _hotkey.Unregister();
-            ViewModel.HotkeyError = null;
-        }
+            ContextMenuMode = ContextMenuMode.PopupMenu,
+            ContextFlyout = _menu.Flyout,
+            MenuActivation = PopupActivationMode.RightClick,
+            NoLeftClickDelay = true,
+            LeftClickCommand = new ActionCommand(ToggleFlyout),
+        };
+        UpdateTray();
+        _tray.ForceCreate(enablesEfficiencyMode: false);
     }
 
     private void UpdateTray()
     {
         if (_tray is null) return;
         _tray.ToolTipText = ViewModel.Summary;
+        _menu?.Update(ViewModel);
         if (ViewModel.IsConnected == _iconConnected) return;
         _iconConnected = ViewModel.IsConnected;
         var previous = _tray.Icon;
@@ -160,15 +156,18 @@ public partial class App : Application
         previous?.Dispose();
     }
 
-    // Thème clair/sombre de la barre des tâches changé : on redessine l'icône.
-    private void OnUserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs e)
+    private void ApplyHotkeySetting()
     {
-        if (e.Category != UserPreferenceCategory.General) return;
-        Dispatcher.BeginInvoke(() =>
+        if (_hotkey is null) return;
+        if (ViewModel.HotkeyEnabled)
         {
-            _iconConnected = null;
-            UpdateTray();
-        });
+            ViewModel.HotkeyError = _hotkey.Register() ? "" : $"{GlobalHotkey.Label} est déjà utilisé par une autre application.";
+        }
+        else
+        {
+            _hotkey.Unregister();
+            ViewModel.HotkeyError = "";
+        }
     }
 
     private static TextWriter OpenLog()
@@ -178,16 +177,56 @@ public partial class App : Application
         return TextWriter.Synchronized(new StreamWriter(path, append: false) { AutoFlush = true });
     }
 
-    protected override void OnExit(ExitEventArgs e)
+    /// <summary>Menu du clic droit sur l'icône, reconstruit à partir de l'état à chaque changement.</summary>
+    private sealed class TrayMenu
     {
-        _trimmer.Stop();
-        SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
-        _showRegistration?.Unregister(null);
-        _hotkey?.Dispose();
-        _tray?.Dispose();
-        _headset?.Dispose();
-        _log?.Dispose();
-        _showRequested?.Dispose();
-        base.OnExit(e);
+        private readonly MenuFlyoutItem _header = new() { IsEnabled = false };
+        private readonly Dictionary<AmbientMode, ToggleMenuFlyoutItem> _modes = [];
+        private readonly ToggleMenuFlyoutItem _mic = new() { Text = "Micro du casque" };
+
+        public TrayMenu(App app)
+        {
+            Flyout.Items.Add(_header);
+            Flyout.Items.Add(new MenuFlyoutSeparator());
+            foreach (var mode in Labels.ModeOrder)
+            {
+                var item = new ToggleMenuFlyoutItem { Text = Labels.Of(mode), Command = new ActionCommand(() => app.ViewModel.SetMode(mode)) };
+                _modes[mode] = item;
+                Flyout.Items.Add(item);
+            }
+            Flyout.Items.Add(new MenuFlyoutSeparator());
+            _mic.Command = new ActionCommand(() => app.ViewModel.MicEnabled = !app.ViewModel.MicEnabled);
+            Flyout.Items.Add(_mic);
+            Flyout.Items.Add(new MenuFlyoutSeparator());
+            Flyout.Items.Add(new MenuFlyoutItem { Text = "Réglages…", Command = new ActionCommand(() => app.ShowSettings()) });
+            Flyout.Items.Add(new MenuFlyoutItem { Text = "Quitter", Command = new ActionCommand(app.Quit) });
+        }
+
+        public MenuFlyout Flyout { get; } = new();
+
+        public void Update(MainViewModel vm)
+        {
+            _header.Text = vm.Summary;
+            foreach (var (mode, item) in _modes)
+            {
+                item.IsChecked = vm.Mode == mode;
+                item.IsEnabled = vm.IsConnected;
+            }
+            _mic.IsChecked = vm.MicEnabled;
+            _mic.IsEnabled = vm.MicAvailable;
+        }
     }
+}
+
+internal sealed class ActionCommand(Action execute) : ICommand
+{
+    public event EventHandler? CanExecuteChanged
+    {
+        add { }
+        remove { }
+    }
+
+    public bool CanExecute(object? parameter) => true;
+
+    public void Execute(object? parameter) => execute();
 }

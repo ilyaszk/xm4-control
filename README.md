@@ -12,9 +12,10 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
   (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
 - **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli
 - **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris
-- DSEE Extreme, Speak-to-Chat, pause au retrait du casque, pavé tactile, guide vocal, réduction du vent
+- Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
+  extinction automatique, pavé tactile, guide vocal, réduction du vent
 - Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
-- Interface Windows 11 (Mica, thème clair/sombre et couleur d'accent du système)
+- Interface WinUI 3, celle de Windows 11 (Mica, Acrylic, thème clair/sombre du système)
 - Outil en ligne de commande `xm4` pour les scripts
 
 ## Installation
@@ -41,7 +42,7 @@ xm4 nc                     réduction de bruit
 xm4 ambient [1-20] [voix]  son ambiant
 xm4 wind | off             réduction du vent / désactivé
 xm4 eq BassBoost           préréglage d'égaliseur
-xm4 dsee|s2c|pause|touch|voice on|off
+xm4 dsee|s2c|pause|autooff|touch|voice on|off
 xm4 mic off                stéréo sans micro (mic on pour revenir)
 xm4 raw 6602 -v            debug : payload brut, -v affiche les trames
 ```
@@ -79,11 +80,17 @@ Le premier octet du payload est la commande, par quadruplets GET (`n`), RET (`n+
 | Son ambiant | `66 02` | `68 02 11 02 02 01 00 00` (réduction de bruit) |
 | Égaliseur | `56 01` | `58 01 <préréglage> 00` |
 | DSEE Extreme | `E6 02` | `E8 02 00 <on>` |
-| Pavé tactile | `D6 D2` | `D8 D2 01 <on>` |
+| Pavé tactile | `D6 D1` | `D8 D1 01 <on>` |
 | Pause au retrait | `F6 03` | `F8 03 00 <on>` |
+| Extinction automatique | `F6 04` | `F8 04 01 10 00` (quand on ne le porte plus), `11 00` (jamais) |
 | Speak-to-Chat | `F6 05` | `F8 05 01 <on>` |
+| Réglages Speak-to-Chat | `FA 05` | `FC 05 00 <sensibilité> <focus voix> <délai>` |
+| Optimiseur de réduction de bruit | notifications `85 01 00 <étape>` | `84 01 00 01` (lancer), `00` (arrêter) |
 | Guide vocal (type `0x0E`) | `46 01 01` | `48 01 01 <on>` |
-| Extinction | | `22 00 01` |
+| Éteindre le casque | | `22 00 01` |
+
+Speak-to-Chat : sensibilité `00` auto, `01` élevée, `02` faible ; délai `00` court, `01` standard, `02` long,
+`03` jamais. Optimiseur : `01` vérification du port, `02` pression atmosphérique, `10` analyse, `11` terminé.
 
 Son ambiant, `68 02 <effet> 02 <nc> 01 <voix> <niveau>` : effet `00` éteint / `11` actif ;
 nc `02` réduction de bruit, `01` vent, `00` son ambiant ; niveau de 1 à 20 (`0` en réduction de bruit).
@@ -93,8 +100,11 @@ Particularités constatées sur un XM4 en firmware 2.9.0 :
 - Juste après la connexion, le casque ignore la première trame : l'init est réémise toutes les 300 ms.
 - Speak-to-Chat répond `F7 05 00 <état>` au GET et `F9 05 01 <état>` après un SET ; `F9 05 02 ..` est un
   autre message, ignoré.
-- Pour le pavé tactile, `01` est interprété comme « activé » (comme Gadgetbridge), sans vérification
-  physique pour l'instant.
+- Le pavé tactile est le réglage général `0xD1` : interrogé par `D0 D1`, le casque répond
+  `TOUCH_PANEL_SETTING`. Il n'expose pas `0xD2` (utilisé par Gadgetbridge) ni `0xD3`, même si `D6 D2` reçoit
+  une réponse. Valeur `01` = activé, comme les autres booléens du protocole v1.
+- Le casque n'accepte pas plusieurs connexions RFCOMM rapprochées : laisser quelques secondes entre deux
+  appels de la CLI.
 
 ### Le micro : profil mains libres de Windows
 
@@ -116,26 +126,28 @@ Si Windows le réactive (réappairage…), l'appli le recoupe à la connexion su
 
 ```text
 src/Xm4Control.Core   protocole (trames, commandes, décodage), Bluetooth Win32, client RFCOMM
-src/Xm4Control.App    appli WPF (WPF-UI pour les contrôles Windows 11, H.NotifyIcon pour l'icône)
+src/Xm4Control.App    appli WinUI 3 (Windows App SDK), Community Toolkit pour les cartes de réglages,
+                      H.NotifyIcon pour l'icône de notification
 src/Xm4Control.Cli    outil xm4
 tests/                tests du protocole sur des trames capturées
 ```
 
-Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`).
+Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`). Pas besoin de Visual Studio.
 
 ```powershell
 dotnet build
 dotnet test
 ```
 
-Publier une version (exe autonomes, la version est dans `Directory.Build.props`) :
+Publier une version (la version est dans `Directory.Build.props`). L'appli est non empaquetée (pas de MSIX),
+avec le runtime Windows App SDK embarqué, élaguée et compressée en un seul exe (environ 35 Mo) : ses fichiers sont
+extraits dans un dossier temporaire au premier lancement.
 
 ```powershell
-foreach ($p in 'src/Xm4Control.App', 'src/Xm4Control.Cli') {
-  dotnet publish $p -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-}
-gh release create v1.0.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 1.0.0" --notes "..."
+dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
+dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
+  -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+gh release create v2.0.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.0.0" --notes "..."
 ```
 
 ## Licence

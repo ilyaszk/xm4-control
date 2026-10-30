@@ -1,12 +1,10 @@
-using System.Windows.Controls;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Xm4Control.App.Views.Pages;
 
-public partial class EqualizerPage : Page
+public sealed partial class EqualizerPage : Page
 {
-    public EqualizerPage()
-    {
-        InitializeComponent();
-        DataContext = App.Current.ViewModel;
-    }
+    public EqualizerPage() => InitializeComponent();
+
+    internal MainViewModel ViewModel => App.Current.ViewModel;
 }

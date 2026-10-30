@@ -1,26 +1,38 @@
 # xm4-control
 
-Appli Windows (WPF, .NET 10) + CLI `xm4` pour piloter un Sony WH-1000XM4 en Bluetooth. Voir le README
+Appli Windows (WinUI 3, .NET 10) + CLI `xm4` pour piloter un Sony WH-1000XM4 en Bluetooth. Voir le README
 pour le protocole et la publication d'une version.
 
 ## Commandes
 
-- `dotnet build` / `dotnet test` depuis la racine du projet.
+- `dotnet build` / `dotnet test` depuis la racine du projet (pas besoin de Visual Studio).
 - L'exe de l'appli verrouille sa sortie : arrêter `Xm4Control` (`Stop-Process -Name Xm4Control`) avant de recompiler.
+- Exe de debug : `src/Xm4Control.App/bin/x64/Debug/net10.0-windows10.0.26100.0/win-x64/Xm4Control.exe`
+  (`--log` : trace des trames dans `%LOCALAPPDATA%\Xm4Control\trace.log`, `--tray` : sans fenêtre).
 - Tester sur le vrai casque avec la CLI : `src/Xm4Control.Cli/bin/Debug/net10.0-windows/xm4.exe status -v`
-  (l'appli ne doit pas tourner : une seule connexion RFCOMM à la fois).
-- Version : `Directory.Build.props`. Release : exe autonomes publiés dans `publish/` puis `gh release create`.
+  (l'appli ne doit pas tourner : une seule connexion RFCOMM à la fois ; espacer les appels de quelques secondes).
+- Version : `Directory.Build.props`. Release : `dotnet publish ... -p:Platform=x64 -o publish` puis `gh release create`.
 
-## Appli
+## Appli (WinUI 3)
 
-- WPF-UI 4 (contrôles Windows 11, Mica, thème système) et H.NotifyIcon.Wpf (icône de notification).
-- `MainViewModel` relaie `HeadsetController` : ses setters envoient la commande, l'état réel revient par
-  `Changed`, qui rafraîchit toutes les liaisons (`PropertyChanged("")`).
-- Les pages de réglages sont créées par `NavigationView` : elles prennent leur DataContext dans `App.Current.ViewModel`.
-- H.NotifyIcon n'accepte en `IconSource` que des images chargées depuis une URI : l'icône passe par `Icon` (GDI).
-- Les `NavigationViewItem` de WPF-UI n'exposent aucun motif UI Automation cliquable.
-- Mémoire : popup et Réglages créés à la première ouverture, Réglages détruite à la fermeture ;
-  `MemoryTrimmer` rend la mémoire à Windows 10 s après que l'appli repasse en arrière-plan (~2 Mo au repos).
+- Non empaquetée, runtime Windows App SDK embarqué, exe unique élagué et compressé (~35 Mo). Les composants IA,
+  ML, recherche et widgets du Windows App SDK sont exclus (`ExcludeAssets="all"`) : sinon l'exe fait 300 Mo.
+- Élagage (trimming) : pas de réflexion. Le JSON des réglages passe par le générateur de sources (`SettingsJson`).
+- `Program.cs` remplace le Main généré (instance unique) ; `DispatcherShutdownMode.OnExplicitShutdown`.
+- `MainViewModel` relaie `HeadsetController` ; l'état réel revient par `Changed` → `PropertyChanged("")`.
+  Les liaisons x:Bind TwoWay réécrivent la valeur à chaque rafraîchissement : chaque setter ignore une valeur
+  identique à l'état courant.
+- Pièges WinUI rencontrés :
+  - la conversion implicite bool → Visibility de x:Bind ne s'applique pas : utiliser `Ui.Show(...)` ;
+  - `IsEnabled` n'existe que sur les contrôles, pas sur Grid/StackPanel ;
+  - `AppWindow.ResizeClient` est ignoré une fois la fenêtre affichée : utiliser `MoveAndResize` ;
+  - les fichiers `Content` (icône) doivent avoir `CopyToPublishDirectory` ;
+  - H.NotifyIcon n'accepte qu'une `System.Drawing.Icon` pour une icône générée ; menus natifs sombres via
+    `Ui.FollowSystemThemeInMenus` (uxtheme, non documenté).
+- Mémoire : fenêtres créées à la demande, Réglages détruite à la fermeture ; `MemoryTrimmer` nettoie 10 s puis
+  60 s après le retour en arrière-plan (WinUI relâche des ressources en différé). ~3-8 Mo au repos.
+- Glyphes Segoe Fluent Icons : en XAML `&#xE7F6;`, en C# `MainViewModel.Glyph(0xE7F6)`. Ne pas écrire `""` :
+  les outils d'édition le transforment en caractère invisible.
 
 ## Règles
 

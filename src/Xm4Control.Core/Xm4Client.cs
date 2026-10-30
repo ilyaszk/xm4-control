@@ -101,7 +101,10 @@ public sealed class Xm4Client(PairedDevice device) : IDisposable
     public Task SetEqualizerBandsAsync(IReadOnlyList<int> bands) => SetAndRefresh(Commands.SetEqualizerBands(bands), Commands.GetEqualizer());
     public Task SetDseeAsync(bool on) => SetAndRefresh(Commands.SetDsee(on), Commands.GetDsee());
     public Task SetSpeakToChatAsync(bool on) => SetAndRefresh(Commands.SetSpeakToChat(on), Commands.GetSpeakToChat());
+    public Task SetSpeakToChatConfigAsync(SpeakToChatConfig config) => SetAndRefresh(Commands.SetSpeakToChatConfig(config), Commands.GetSpeakToChatConfig());
     public Task SetPauseWhenTakenOffAsync(bool on) => SetAndRefresh(Commands.SetPauseWhenTakenOff(on), Commands.GetPauseWhenTakenOff());
+    public Task SetAutoPowerOffAsync(bool whenTakenOff) => SetAndRefresh(Commands.SetAutoPowerOff(whenTakenOff), Commands.GetAutoPowerOff());
+    public Task StartNcOptimizerAsync(bool start) => SendAsync(Commands.StartNcOptimizer(start));
     public Task SetTouchSensorAsync(bool on) => SetAndRefresh(Commands.SetTouchSensor(on), Commands.GetTouchSensor());
     public Task SetVoiceGuidanceAsync(bool on) => SetAndRefresh(Commands.SetVoiceGuidance(on), Commands.GetVoiceGuidance());
     public Task RefreshBatteryAsync() => SendAsync(Commands.GetBattery());

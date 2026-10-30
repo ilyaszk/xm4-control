@@ -1,114 +1,168 @@
-<ui:FluentWindow
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
     x:Class="Xm4Control.App.Views.FlyoutWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:protocol="clr-namespace:Xm4Control.Core.Protocol;assembly=Xm4Control.Core"
-    Title="XM4 Control"
-    Width="360"
-    ExtendsContentIntoTitleBar="True"
-    ResizeMode="NoResize"
-    ShowInTaskbar="False"
-    SizeToContent="Height"
-    Topmost="True"
-    WindowBackdropType="Mica"
-    WindowCornerPreference="Round"
-    WindowStartupLocation="Manual">
-    <StackPanel Margin="16">
-        <!-- En-tête : casque, état, batterie -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ui:SymbolIcon Margin="0,0,12,0" FontSize="28" Symbol="Headphones24" />
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <ui:TextBlock FontTypography="BodyStrong" Text="{Binding DeviceName}" />
-                <TextBlock Style="{StaticResource Description}" Text="{Binding StatusText}" />
-            </StackPanel>
-            <StackPanel
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Visibility="{Binding HasBattery, Converter={StaticResource BoolToVisibility}}">
-                <ui:SymbolIcon FontSize="20" Symbol="{Binding BatterySymbol}" />
-                <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" Text="{Binding BatteryText}" />
-            </StackPanel>
-        </Grid>
+    xmlns:views="using:Xm4Control.App.Views"
+    Title="XM4 Control">
+    <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop />
+    </Window.SystemBackdrop>
 
-        <!-- Modes -->
-        <Grid Margin="0,16,-8,0" IsEnabled="{Binding IsConnected}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <ToggleButton CommandParameter="{x:Static protocol:AmbientMode.NoiseCancelling}" IsChecked="{Binding IsNoiseCancelling, Mode=OneWay}" Style="{StaticResource ModeTile}">
-                <StackPanel>
-                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="Headphones24" />
-                    <TextBlock Text="Réduction de bruit" TextAlignment="Center" TextWrapping="Wrap" />
+    <!-- Le ScrollViewer laisse le contenu prendre sa hauteur naturelle : la fenêtre s'y ajuste. -->
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+        <StackPanel
+            x:Name="Root"
+            Padding="16"
+            VerticalAlignment="Top"
+            Spacing="12">
+            <!-- En-tête : casque, état, batterie -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon FontSize="28" Glyph="&#xE7F6;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
                 </StackPanel>
-            </ToggleButton>
-            <ToggleButton Grid.Column="1" CommandParameter="{x:Static protocol:AmbientMode.Ambient}" IsChecked="{Binding IsAmbient, Mode=OneWay}" Style="{StaticResource ModeTile}">
-                <StackPanel>
-                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="HeadphonesSoundWave24" />
-                    <TextBlock Text="Son ambiant" TextAlignment="Center" TextWrapping="Wrap" />
+                <StackPanel
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="6"
+                    Visibility="{x:Bind views:Ui.Show(ViewModel.HasBattery), Mode=OneWay}">
+                    <FontIcon FontSize="18" Glyph="{x:Bind ViewModel.BatteryGlyph, Mode=OneWay}" />
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.BatteryText, Mode=OneWay}" />
                 </StackPanel>
-            </ToggleButton>
-            <ToggleButton Grid.Column="2" CommandParameter="{x:Static protocol:AmbientMode.Off}" IsChecked="{Binding IsOff, Mode=OneWay}" Style="{StaticResource ModeTile}">
-                <StackPanel>
-                    <ui:SymbolIcon Margin="0,0,0,6" FontSize="22" Symbol="Prohibited24" />
-                    <TextBlock Text="Désactivé" TextAlignment="Center" TextWrapping="Wrap" />
-                </StackPanel>
-            </ToggleButton>
-        </Grid>
+            </Grid>
 
-        <!-- Niveau du son ambiant -->
-        <Grid Margin="0,12,0,0" IsEnabled="{Binding IsAmbient}" Style="{StaticResource DimWhenDisabled}">
-            <ui:Card Padding="14,10">
+            <!-- Modes -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <ToggleButton Click="OnNoiseCancelling" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsNoiseCancelling, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
+                    <StackPanel Spacing="6">
+                        <FontIcon Height="26" FontSize="20" Glyph="&#xE7F6;" />
+                        <TextBlock FontSize="12" Text="Réduction de bruit" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Grid.Column="1" Click="OnAmbient" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsAmbient, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
+                    <StackPanel Spacing="6">
+                        <FontIcon Height="26" FontSize="20" Glyph="&#xE767;" />
+                        <TextBlock FontSize="12" Text="Son ambiant" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Grid.Column="2" Click="OnWindReduction" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsWindReduction, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
+                    <StackPanel Spacing="6">
+                        <FontIcon Height="26" FontFamily="Segoe UI Symbol" FontSize="24" Glyph="&#x224B;" />
+                        <TextBlock FontSize="12" Text="Vent" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Grid.Column="3" Click="OnOff" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsOff, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
+                    <StackPanel Spacing="6">
+                        <FontIcon Height="26" FontSize="20" Glyph="&#xE711;" />
+                        <TextBlock FontSize="12" Text="Désactivé" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ToggleButton>
+            </Grid>
+
+            <!-- Niveau du son ambiant, utile seulement en mode son ambiant -->
+            <Border
+                Padding="14,10"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Opacity="{x:Bind views:Ui.Dim(ViewModel.IsAmbient), Mode=OneWay}">
                 <StackPanel>
                     <Grid>
                         <TextBlock Text="Niveau du son ambiant" />
-                        <TextBlock HorizontalAlignment="Right" Style="{StaticResource Description}" Text="{Binding AmbientLevel}" />
+                        <TextBlock
+                            HorizontalAlignment="Right"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.AmbientLevel, Mode=OneWay}" />
                     </Grid>
                     <Slider
-                        Margin="0,6,0,4"
-                        IsSnapToTickEnabled="True"
+                        IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                         Maximum="20"
                         Minimum="1"
-                        TickFrequency="1"
-                        Value="{Binding AmbientLevel, Delay=300}" />
+                        StepFrequency="1"
+                        Value="{x:Bind ViewModel.AmbientLevelValue, Mode=TwoWay}" />
                     <Grid>
                         <TextBlock VerticalAlignment="Center" Text="Focus sur la voix" />
-                        <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding FocusOnVoice}" />
+                        <ToggleSwitch
+                            MinWidth="0"
+                            HorizontalAlignment="Right"
+                            IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
+                            IsOn="{x:Bind ViewModel.FocusOnVoice, Mode=TwoWay}"
+                            OffContent=""
+                            OnContent="" />
                     </Grid>
                 </StackPanel>
-            </ui:Card>
-        </Grid>
+            </Border>
 
-        <!-- Micro -->
-        <ui:CardControl Margin="0,8,0,0" Padding="14,10" Icon="{ui:SymbolIcon Mic24}" IsEnabled="{Binding MicAvailable}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="Micro du casque" />
-                    <TextBlock Style="{StaticResource Description}" Text="Coupé : stéréo HD en permanence" />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding MicEnabled}" />
-        </ui:CardControl>
+            <!-- Micro -->
+            <Border
+                Padding="14,10"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE720;" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Micro du casque" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="Coupé : stéréo HD en permanence" />
+                    </StackPanel>
+                    <ToggleSwitch
+                        Grid.Column="2"
+                        MinWidth="0"
+                        IsEnabled="{x:Bind ViewModel.MicAvailable, Mode=OneWay}"
+                        IsOn="{x:Bind ViewModel.MicEnabled, Mode=TwoWay}"
+                        OffContent=""
+                        OnContent="" />
+                </Grid>
+            </Border>
 
-        <TextBlock
-            Margin="2,8,0,0"
-            Foreground="{DynamicResource SystemFillColorCriticalBrush}"
-            Text="{Binding Error}"
-            TextWrapping="Wrap"
-            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+            <TextBlock
+                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                Text="{x:Bind ViewModel.Error, Mode=OneWay}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind views:Ui.Show(ViewModel.HasError), Mode=OneWay}" />
 
-        <!-- Pied : égaliseur et réglages -->
-        <Grid Margin="0,14,0,0">
-            <ui:Button Click="OnOpenEqualizer" Content="{Binding EqualizerLabel}" Icon="{ui:SymbolIcon DeviceEq24}" IsEnabled="{Binding IsConnected}" />
-            <ui:Button HorizontalAlignment="Right" Click="OnOpenSettings" Content="Réglages" Icon="{ui:SymbolIcon Settings24}" />
-        </Grid>
-    </StackPanel>
-</ui:FluentWindow>
+            <!-- Pied : égaliseur et réglages -->
+            <Grid>
+                <Button Click="OnOpenEqualizer" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="16" Glyph="&#xE9E9;" />
+                        <TextBlock Text="{x:Bind ViewModel.EqualizerLabel, Mode=OneWay}" />
+                    </StackPanel>
+                </Button>
+                <Button HorizontalAlignment="Right" Click="OnOpenSettings">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="16" Glyph="&#xE713;" />
+                        <TextBlock Text="Réglages" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

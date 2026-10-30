@@ -1,91 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Xm4Control.App.Views.Pages.HeadsetPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:views="clr-namespace:Xm4Control.App.Views"
-    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    Title="Casque">
-    <StackPanel Margin="24,12,24,24">
-        <ui:TextBlock Margin="0,0,0,16" FontTypography="Title" Text="Casque" />
-        <views:StatusBanner />
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:views="using:Xm4Control.App.Views">
+    <ScrollViewer>
+        <StackPanel
+            MaxWidth="1000"
+            Padding="36,8,36,36"
+            Spacing="{StaticResource SettingsCardSpacing}">
+            <TextBlock Margin="0,0,0,16" Style="{StaticResource TitleTextBlockStyle}" Text="Casque" />
+            <views:StatusBanner />
 
-        <ui:Card Padding="16,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <TextBlock Margin="0,3,32,3" Style="{StaticResource Description}" Text="Appareil" />
-                <TextBlock Grid.Column="1" Margin="0,3" Text="{Binding DeviceName}" />
-                <TextBlock Grid.Row="1" Margin="0,3,32,3" Style="{StaticResource Description}" Text="Batterie" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,3" Text="{Binding BatteryDetail}" />
-                <TextBlock Grid.Row="2" Margin="0,3,32,3" Style="{StaticResource Description}" Text="Codec" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,3" Text="{Binding Codec}" />
-                <TextBlock Grid.Row="3" Margin="0,3,32,3" Style="{StaticResource Description}" Text="Firmware" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,3" Text="{Binding Firmware}" />
-            </Grid>
-        </ui:Card>
+            <Border
+                Padding="20,14"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource ControlCornerRadius}">
+                <Grid ColumnSpacing="40" RowSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Appareil" />
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Batterie" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.BatteryDetail, Mode=OneWay}" />
+                    <TextBlock Grid.Row="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Codec" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind ViewModel.Codec, Mode=OneWay}" />
+                    <TextBlock Grid.Row="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Firmware" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ViewModel.Firmware, Mode=OneWay}" />
+                </Grid>
+            </Border>
 
-        <ui:TextBlock Margin="0,24,0,8" FontTypography="BodyStrong" Text="Fonctions" />
-        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon Sparkle24}" IsEnabled="{Binding HasDsee}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="DSEE Extreme" />
-                    <TextBlock Style="{StaticResource Description}" Text="Restaure les détails perdus par la compression de la musique." />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding Dsee}" />
-        </ui:CardControl>
-        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon Chat24}" IsEnabled="{Binding HasSpeakToChat}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="Speak-to-Chat" />
-                    <TextBlock Style="{StaticResource Description}" Text="Met la musique en pause et laisse passer le son quand vous parlez." />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding SpeakToChat}" />
-        </ui:CardControl>
-        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon PauseCircle24}" IsEnabled="{Binding HasPauseWhenTakenOff}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="Pause au retrait du casque" />
-                    <TextBlock Style="{StaticResource Description}" Text="Met la lecture en pause quand vous enlevez le casque." />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding PauseWhenTakenOff}" />
-        </ui:CardControl>
-        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon TapSingle24}" IsEnabled="{Binding HasTouchSensor}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="Pavé tactile" />
-                    <TextBlock Style="{StaticResource Description}" Text="Commandes tactiles sur l'écouteur droit." />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding TouchSensor}" />
-        </ui:CardControl>
-        <ui:CardControl Margin="0,0,0,4" Icon="{ui:SymbolIcon Speaker224}" IsEnabled="{Binding HasVoiceGuidance}">
-            <ui:CardControl.Header>
-                <StackPanel>
-                    <TextBlock Text="Guide vocal" />
-                    <TextBlock Style="{StaticResource Description}" Text="Annonces vocales du casque (connexion, batterie, mode…)." />
-                </StackPanel>
-            </ui:CardControl.Header>
-            <ui:ToggleSwitch IsChecked="{Binding VoiceGuidance}" />
-        </ui:CardControl>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Fonctions" />
 
-        <ui:Button
-            Margin="0,20,0,0"
-            Appearance="Danger"
-            Click="OnPowerOff"
-            Content="Éteindre le casque"
-            Icon="{ui:SymbolIcon Power24}"
-            IsEnabled="{Binding IsConnected}" />
-    </StackPanel>
+            <toolkit:SettingsCard
+                Description="Restaure les détails perdus par la compression de la musique."
+                Header="DSEE Extreme"
+                IsEnabled="{x:Bind ViewModel.HasDsee, Mode=OneWay}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8D6;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.Dsee, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <toolkit:SettingsExpander
+                Description="Met la musique en pause et laisse passer le son quand vous parlez."
+                Header="Speak-to-Chat"
+                IsEnabled="{x:Bind ViewModel.HasSpeakToChat, Mode=OneWay}">
+                <toolkit:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xE8BD;" />
+                </toolkit:SettingsExpander.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.SpeakToChat, Mode=TwoWay}" />
+                <toolkit:SettingsExpander.Items>
+                    <toolkit:SettingsCard
+                        Description="Élevée : réagit même quand vous parlez doucement."
+                        Header="Sensibilité de détection de la voix"
+                        IsEnabled="{x:Bind ViewModel.HasSpeakToChatConfig, Mode=OneWay}">
+                        <ComboBox
+                            MinWidth="220"
+                            ItemsSource="{x:Bind ViewModel.SensitivityLabels}"
+                            SelectedIndex="{x:Bind ViewModel.SensitivityIndex, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard
+                        Description="Délai sans parole avant que la musique reprenne."
+                        Header="Fin du mode conversation"
+                        IsEnabled="{x:Bind ViewModel.HasSpeakToChatConfig, Mode=OneWay}">
+                        <ComboBox
+                            MinWidth="220"
+                            ItemsSource="{x:Bind ViewModel.TimeoutLabels}"
+                            SelectedIndex="{x:Bind ViewModel.TimeoutIndex, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard
+                        Description="Met en avant les voix dans le son ambiant laissé passer."
+                        Header="Focus sur la voix pendant la conversation"
+                        IsEnabled="{x:Bind ViewModel.HasSpeakToChatConfig, Mode=OneWay}">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.SpeakToChatVoiceFocus, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+                </toolkit:SettingsExpander.Items>
+            </toolkit:SettingsExpander>
+
+            <toolkit:SettingsCard
+                Description="Met la lecture en pause quand vous enlevez le casque."
+                Header="Pause au retrait du casque"
+                IsEnabled="{x:Bind ViewModel.HasPauseWhenTakenOff, Mode=OneWay}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE769;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.PauseWhenTakenOff, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <toolkit:SettingsCard
+                Description="Le casque s'éteint tout seul quand vous ne le portez plus."
+                Header="Extinction automatique"
+                IsEnabled="{x:Bind ViewModel.HasAutoPowerOff, Mode=OneWay}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7E8;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.AutoPowerOff, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <toolkit:SettingsCard
+                Description="Commandes tactiles sur l'écouteur droit."
+                Header="Pavé tactile"
+                IsEnabled="{x:Bind ViewModel.HasTouchSensor, Mode=OneWay}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7C9;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.TouchSensor, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <toolkit:SettingsCard
+                Description="Annonces vocales du casque (connexion, batterie, mode…)."
+                Header="Guide vocal"
+                IsEnabled="{x:Bind ViewModel.HasVoiceGuidance, Mode=OneWay}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE767;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.VoiceGuidance, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <Button
+                Margin="0,20,0,0"
+                Click="OnPowerOff"
+                IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="16" Glyph="&#xE7E8;" />
+                    <TextBlock Text="Éteindre le casque" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

@@ -34,4 +34,28 @@ public static class Labels
     };
 
     public static readonly string[] EqBands = ["Clear Bass", "400 Hz", "1 kHz", "2,5 kHz", "6,3 kHz", "16 kHz"];
+
+    public static string Of(SpeakToChatSensitivity sensitivity) => sensitivity switch
+    {
+        SpeakToChatSensitivity.High => "Élevée",
+        SpeakToChatSensitivity.Low => "Faible",
+        _ => "Automatique",
+    };
+
+    public static string Of(SpeakToChatTimeout timeout) => timeout switch
+    {
+        SpeakToChatTimeout.Short => "Court (environ 15 s)",
+        SpeakToChatTimeout.Long => "Long (environ 1 min)",
+        SpeakToChatTimeout.Off => "Jamais automatiquement",
+        _ => "Standard (environ 30 s)",
+    };
+
+    public static string Of(NcOptimizerStatus status) => status switch
+    {
+        NcOptimizerStatus.CheckingFit => "Vérification du port du casque…",
+        NcOptimizerStatus.MeasuringPressure => "Mesure de la pression atmosphérique…",
+        NcOptimizerStatus.Analyzing => "Analyse…",
+        NcOptimizerStatus.Finished => "Optimisation terminée.",
+        _ => "",
+    };
 }

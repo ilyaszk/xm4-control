@@ -15,9 +15,13 @@ public sealed record Xm4State
     public int[]? EqBands { get; init; }
     public bool? Dsee { get; init; }
     public bool? SpeakToChat { get; init; }
+    public SpeakToChatConfig? SpeakToChatConfig { get; init; }
     public bool? PauseWhenTakenOff { get; init; }
+    /// <summary>Vrai : extinction quand le casque n'est plus porté ; faux : jamais.</summary>
+    public bool? AutoPowerOff { get; init; }
     public bool? TouchSensor { get; init; }
     public bool? VoiceGuidance { get; init; }
+    public NcOptimizerStatus NcOptimizer { get; init; }
 }
 
 /// <summary>Décode les payloads RET/NOTIFY envoyés par le casque.</summary>
@@ -61,11 +65,23 @@ public static class ResponseParser
                 var ambient = ParseAmbient(p);
                 return ambient is null ? state : state with { Ambient = ambient };
 
-            case 0xD7 or 0xD9 when p.Length >= 4 && p[1] == 0xD2 && TryBool(p[3], out var touch):
+            case 0x85 when p.Length >= 4 && Enum.IsDefined((NcOptimizerStatus)p[3]):
+                return state with { NcOptimizer = (NcOptimizerStatus)p[3] };
+
+            // Réglage général 0xD1 (pavé tactile) : D7 D1 01 xx, 01 = activé.
+            case 0xD7 or 0xD9 when p.Length >= 4 && p[1] == 0xD1 && TryBool(p[3], out var touch):
                 return state with { TouchSensor = touch };
 
             case 0xE7 or 0xE9 when p.Length >= 4 && p[1] == 0x02 && TryBool(p[3], out var dsee):
                 return state with { Dsee = dsee };
+
+            case 0xF7 or 0xF9 when p.Length >= 5 && p[1] == 0x04:
+                return p[3] switch
+                {
+                    0x10 => state with { AutoPowerOff = true },
+                    0x11 => state with { AutoPowerOff = false },
+                    _ => state,
+                };
 
             case 0xF7 or 0xF9 when p.Length >= 4 && TryBool(p[3], out var flag):
                 return p[1] switch
@@ -75,6 +91,15 @@ public static class ResponseParser
                     // F9 05 02 .. est un autre message (pas l'activation de la fonction).
                     0x05 when p[2] is 0x00 or 0x01 => state with { SpeakToChat = flag },
                     _ => state,
+                };
+
+            case 0xFB or 0xFD when p.Length >= 6 && p[1] == 0x05
+                                   && Enum.IsDefined((SpeakToChatSensitivity)p[3])
+                                   && TryBool(p[4], out var voiceFocus)
+                                   && Enum.IsDefined((SpeakToChatTimeout)p[5]):
+                return state with
+                {
+                    SpeakToChatConfig = new SpeakToChatConfig((SpeakToChatSensitivity)p[3], voiceFocus, (SpeakToChatTimeout)p[5]),
                 };
 
             default:
