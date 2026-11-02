@@ -22,6 +22,14 @@ pour le protocole et la publication d'une version.
 - `MainViewModel` relaie `HeadsetController` ; l'état réel revient par `Changed` → `PropertyChanged("")`.
   Les liaisons x:Bind TwoWay réécrivent la valeur à chaque rafraîchissement : chaque setter ignore une valeur
   identique à l'état courant.
+- Fenêtre principale (`SettingsWindow`) : page web locale `src/Xm4Control.App/Web` (HTML/CSS/JS sans framework)
+  dans WebView2, servie sur l'hôte virtuel `https://app.xm4/`. `WebBridge` envoie l'état complet (`WebState`,
+  JSON par générateur de sources `WebJson`) à chaque changement et applique les commandes `{cmd, value}` de la
+  page. Nouveau réglage : propriété dans `WebState`, cas dans `WebBridge.Apply`, élément `data-switch`
+  dans `index.html`. Hors de l'appli (navigateur), `app.js` affiche un état d'exemple pour l'aperçu.
+  Casque 3D : `headset3d.js` (three.js embarqué dans `Web/vendor`, imports réécrits en chemins relatifs car la
+  CSP interdit une importmap en ligne) ; rendu à la demande seulement, image `headset.png` si WebGL échoue.
+  Le popup reste en WinUI (ouverture instantanée, mémoire au repos).
 - Pièges WinUI rencontrés :
   - la conversion implicite bool → Visibility de x:Bind ne s'applique pas : utiliser `Ui.Show(...)` ;
   - `IsEnabled` n'existe que sur les contrôles, pas sur Grid/StackPanel ;

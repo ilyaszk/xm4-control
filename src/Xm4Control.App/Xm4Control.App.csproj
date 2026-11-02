@@ -36,6 +36,8 @@
 
   <ItemGroup>
     <Content Include="Assets\app.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Page web de la fenêtre principale (WebView2) ; Web/headset.png est rendue par tools/headset-render. -->
+    <Content Include="Web\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
@@ -48,7 +50,6 @@
     <PackageReference Include="Microsoft.WindowsAppSDK.Search" Version="2.6.4" ExcludeAssets="all" />
     <PackageReference Include="Microsoft.WindowsAppSDK.Widgets" Version="2.6.4" ExcludeAssets="all" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
     <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
     <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
   </ItemGroup>

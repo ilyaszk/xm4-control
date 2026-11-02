@@ -56,6 +56,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public bool HasBattery => IsConnected && State.Battery.HasValue;
     public string BatteryText => State.Battery is { } b ? $"{b} %" : "";
+    public double BatteryLevel => State.Battery ?? 0;
+    public bool IsCharging => State.Charging;
 
     /// <summary>Glyphe Segoe Fluent Icons : Battery0 à Battery9 = E850 à E859, Battery10 = E83F.</summary>
     public string BatteryGlyph => State switch

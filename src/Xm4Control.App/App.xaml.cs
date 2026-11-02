@@ -100,7 +100,7 @@ public partial class App : Application
     }
 
     // La fenêtre Réglages est détruite à sa fermeture, et recréée à la demande.
-    internal void ShowSettings(Type? page = null)
+    internal void ShowSettings(string? page = null)
     {
         if (_settingsWindow is null)
         {

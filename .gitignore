@@ -4,3 +4,4 @@ publish/
 .vs/
 *.user
 TestResults/
+docs/3d/src/

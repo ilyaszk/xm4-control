@@ -1,7 +1,6 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
-using Xm4Control.App.Views.Pages;
 using Xm4Control.Core.Protocol;
 
 namespace Xm4Control.App.Views;
@@ -110,6 +109,6 @@ public sealed partial class FlyoutWindow : Window
     private void OnOpenEqualizer(object sender, RoutedEventArgs e)
     {
         HideFlyout();
-        App.Current.ShowSettings(typeof(EqualizerPage));
+        App.Current.ShowSettings("eq");
     }
 }

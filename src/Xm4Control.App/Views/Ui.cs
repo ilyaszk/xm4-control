@@ -23,21 +23,6 @@ public static class Ui
 
     public static void BringToFront(Window window) => SetForegroundWindow(Handle(window));
 
-    /// <summary>Boîte de confirmation ; renvoie vrai si l'action principale est choisie.</summary>
-    public static async Task<bool> ConfirmAsync(XamlRoot root, string title, string message, string action)
-    {
-        var dialog = new ContentDialog
-        {
-            XamlRoot = root,
-            Title = title,
-            Content = message,
-            PrimaryButtonText = action,
-            CloseButtonText = "Annuler",
-            DefaultButton = ContentDialogButton.Close,
-        };
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
-    }
-
     /// <summary>
     /// Menus natifs (clic droit sur l'icône) au thème clair ou sombre du système. API non documentée de uxtheme
     /// (ordinaux 135 et 136, Windows 10 1903 et plus), utilisée par la plupart des applis Win32 pour cet usage.

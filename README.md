@@ -17,7 +17,8 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 - Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
   extinction automatique, pavé tactile, guide vocal, réduction du vent
 - Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
-- Interface WinUI 3, celle de Windows 11 (Mica, Acrylic, thème clair/sombre du système)
+- Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système) ; fenêtre principale en HTML/CSS
+  affichée par WebView2 (thème sombre, rendu du casque)
 - Outil en ligne de commande `xm4` pour les scripts
 
 ## Installation
@@ -33,7 +34,7 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 ## Utilisation
 
 - **Clic gauche** sur l'icône : popup rapide. **Clic droit** : menu (modes, micro, réglages, quitter).
-- La fenêtre Réglages se cache quand on la ferme ; l'appli reste dans la zone de notification.
+- La fenêtre principale se ferme (et libère sa mémoire) quand on la ferme ; l'appli reste dans la zone de notification.
 - `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
 
 **Ligne de commande** (`xm4.exe`, aussi dans les Releases) :
@@ -128,11 +129,24 @@ Si Windows le réactive (réappairage…), l'appli le recoupe à la connexion su
 
 ```text
 src/Xm4Control.Core   protocole (trames, commandes, décodage), Bluetooth Win32, client RFCOMM
-src/Xm4Control.App    appli WinUI 3 (Windows App SDK), Community Toolkit pour les cartes de réglages,
-                      H.NotifyIcon pour l'icône de notification
+src/Xm4Control.App    appli WinUI 3 (Windows App SDK) : popup, icône de notification (H.NotifyIcon)
+src/Xm4Control.App/Web  fenêtre principale en HTML/CSS/JS (WebView2), casque 3D avec three.js
 src/Xm4Control.Cli    outil xm4
 tests/                tests du protocole sur des trames capturées
+tools/headset-render  scripts Blender : modèle 3D allégé (Web/headset.glb) et image de secours (Web/headset.png)
 ```
+
+Le modèle 3D et l'image se recalculent avec Blender (`winget install BlenderFoundation.Blender`), à partir du
+modèle glTF téléchargé depuis Sketchfab et décompressé dans `docs/3d/src/` (non versionné) :
+
+```powershell
+$blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
+& $blender -b -P tools/headset-render/export_web.py -- docs/3d/src/scene.gltf src/Xm4Control.App/Web/headset.glb
+& $blender -b -P tools/headset-render/render.py -- docs/3d/src/scene.gltf src/Xm4Control.App/Web/headset.png
+```
+
+La page de la fenêtre principale s'ouvre aussi dans un navigateur, avec un état d'exemple, pour travailler le
+design (servir le dossier `Web` en HTTP local : les modules JS ne se chargent pas en `file://`).
 
 Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`). Pas besoin de Visual Studio.
 
@@ -155,3 +169,8 @@ gh release create v2.0.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Con
 ## Licence
 
 [MIT](LICENSE). Projet indépendant, non affilié à Sony.
+
+Le casque en 3D (et son image) est tiré du modèle « [SONY headphone WH-1000XM4](https://sketchfab.com/3d-models/sony-headphone-wh-1000xm4-f90f76c75d8143eb97eb49844050aa26) »
+de [Chizuko V](https://sketchfab.com/chizuk0), sous licence [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+Embarqués dans `Web/vendor` : [three.js](https://threejs.org) (MIT) et la police
+[Geist](https://vercel.com/font) (SIL Open Font License), avec leurs licences.

@@ -21,13 +21,6 @@
             <Color x:Key="SystemAccentColorDark2">#FF003E92</Color>
             <Color x:Key="SystemAccentColorDark3">#FF001A68</Color>
 
-            <x:Double x:Key="SettingsCardSpacing">4</x:Double>
-
-            <!-- Titre de section, comme dans l'app Paramètres de Windows. -->
-            <Style x:Key="SectionHeaderStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
-                <Setter Property="Margin" Value="1,28,0,6" />
-            </Style>
-
             <!-- Tuile de mode du popup (réduction de bruit, son ambiant…). -->
             <Style x:Key="ModeTileStyle" BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
                 <Setter Property="Height" Value="78" />
@@ -36,11 +29,6 @@
                 <Setter Property="Padding" Value="2,4" />
             </Style>
 
-            <!-- Même tuile, plus grande, pour la page Son ambiant des réglages. -->
-            <Style x:Key="PageModeTileStyle" BasedOn="{StaticResource ModeTileStyle}" TargetType="ToggleButton">
-                <Setter Property="Height" Value="104" />
-                <Setter Property="CornerRadius" Value="8" />
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
