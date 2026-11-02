@@ -16,93 +16,225 @@
             Padding="16"
             VerticalAlignment="Top"
             Spacing="12">
-            <!-- En-tête : casque, état, batterie -->
-            <Grid ColumnSpacing="12">
+
+            <!-- En-tête : petit casque avec halo, mode, batterie -->
+            <Grid ColumnSpacing="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <FontIcon FontSize="28" Glyph="&#xE7F6;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" />
+                <Grid Width="76" Height="76">
+                    <Ellipse Margin="-6" Fill="{x:Bind ModeGlow(ViewModel.IsConnected, ViewModel.IsNoiseCancelling, ViewModel.IsAmbient, ViewModel.IsWindReduction), Mode=OneWay}" />
+                    <Image
+                        x:Name="Headset"
+                        AutomationProperties.Name="Casque Sony WH-1000XM4"
+                        Opacity="{x:Bind views:Ui.Dim(ViewModel.IsConnected), Mode=OneWay}"
+                        Stretch="Uniform" />
+                </Grid>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
                     <TextBlock
+                        CharacterSpacing="100"
+                        FontSize="11"
+                        FontWeight="SemiBold"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
+                        Text="{x:Bind DeviceCaps(ViewModel.DeviceName), Mode=OneWay}" />
+                    <TextBlock
+                        FontFamily="Segoe UI Variable Display"
+                        FontSize="23"
+                        FontWeight="Light"
+                        Text="{x:Bind ModeTitle(ViewModel.IsConnected, ViewModel.IsNoiseCancelling, ViewModel.IsAmbient, ViewModel.IsWindReduction, ViewModel.IsOff), Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis" />
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Ellipse
+                            Width="7"
+                            Height="7"
+                            VerticalAlignment="Center"
+                            Fill="{x:Bind StatusDot(ViewModel.IsConnected), Mode=OneWay}" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
                 </StackPanel>
-                <StackPanel
+                <!-- Batterie : anneau et pourcentage -->
+                <Grid
                     Grid.Column="2"
+                    Width="46"
+                    Height="46"
                     VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="6"
                     Visibility="{x:Bind views:Ui.Show(ViewModel.HasBattery), Mode=OneWay}">
-                    <FontIcon FontSize="18" Glyph="{x:Bind ViewModel.BatteryGlyph, Mode=OneWay}" />
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.BatteryText, Mode=OneWay}" />
-                </StackPanel>
+                    <ProgressRing
+                        Width="46"
+                        Height="46"
+                        Background="{ThemeResource ControlStrongStrokeColorDisabledBrush}"
+                        Foreground="#FF3DCC8A"
+                        IsIndeterminate="False"
+                        Maximum="100"
+                        Value="{x:Bind ViewModel.BatteryLevel, Mode=OneWay}" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Text="{x:Bind BatteryNumber(ViewModel.BatteryLevel), Mode=OneWay}" />
+                </Grid>
             </Grid>
 
-            <!-- Modes -->
-            <Grid ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <ToggleButton Click="OnNoiseCancelling" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsNoiseCancelling, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
-                    <StackPanel Spacing="6">
-                        <FontIcon Height="26" FontSize="20" Glyph="&#xE7F6;" />
-                        <TextBlock FontSize="12" Text="Réduction de bruit" TextAlignment="Center" TextWrapping="Wrap" />
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Grid.Column="1" Click="OnAmbient" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsAmbient, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
-                    <StackPanel Spacing="6">
-                        <FontIcon Height="26" FontSize="20" Glyph="&#xE767;" />
-                        <TextBlock FontSize="12" Text="Son ambiant" TextAlignment="Center" TextWrapping="Wrap" />
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Grid.Column="2" Click="OnWindReduction" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsWindReduction, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
-                    <StackPanel Spacing="6">
-                        <FontIcon Height="26" FontFamily="Segoe UI Symbol" FontSize="24" Glyph="&#x224B;" />
-                        <TextBlock FontSize="12" Text="Vent" TextAlignment="Center" TextWrapping="Wrap" />
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Grid.Column="3" Click="OnOff" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" IsChecked="{x:Bind ViewModel.IsOff, Mode=OneWay}" Style="{StaticResource ModeTileStyle}">
-                    <StackPanel Spacing="6">
-                        <FontIcon Height="26" FontSize="20" Glyph="&#xE711;" />
-                        <TextBlock FontSize="12" Text="Désactivé" TextAlignment="Center" TextWrapping="Wrap" />
-                    </StackPanel>
-                </ToggleButton>
-            </Grid>
+            <!-- Modes : quatre tuiles dans un bandeau, description du mode actif dessous -->
+            <StackPanel Spacing="6">
+                <Border
+                    Padding="5"
+                    Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                    <Grid ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <ToggleButton
+                            AutomationProperties.Name="Réduction de bruit"
+                            Click="OnNoiseCancelling"
+                            IsChecked="{x:Bind ViewModel.IsNoiseCancelling, Mode=OneWay}"
+                            IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
+                            Style="{StaticResource ModeTileStyle}">
+                            <ToggleButton.Resources>
+                                <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="NoiseBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="NoiseBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="NoiseBrush" />
+                                <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="ModeInk" />
+                            </ToggleButton.Resources>
+                            <StackPanel Spacing="5">
+                                <FontIcon FontSize="18" Glyph="&#xE7F6;" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Bruit" TextAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton
+                            Grid.Column="1"
+                            AutomationProperties.Name="Son ambiant"
+                            Click="OnAmbient"
+                            IsChecked="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
+                            IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
+                            Style="{StaticResource ModeTileStyle}">
+                            <ToggleButton.Resources>
+                                <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="AmbientBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="AmbientBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="AmbientBrush" />
+                                <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="ModeInk" />
+                            </ToggleButton.Resources>
+                            <StackPanel Spacing="5">
+                                <FontIcon FontSize="18" Glyph="&#xE767;" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Ambiant" TextAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton
+                            Grid.Column="2"
+                            AutomationProperties.Name="Réduction du vent"
+                            Click="OnWindReduction"
+                            IsChecked="{x:Bind ViewModel.IsWindReduction, Mode=OneWay}"
+                            IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
+                            Style="{StaticResource ModeTileStyle}">
+                            <ToggleButton.Resources>
+                                <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="WindBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="WindBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="WindBrush" />
+                                <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="ModeInk" />
+                            </ToggleButton.Resources>
+                            <StackPanel Spacing="5">
+                                <!-- Pas de pictogramme "vent" dans Segoe Fluent Icons : ≋ de Segoe UI Symbol. -->
+                                <FontIcon FontFamily="Segoe UI Symbol" FontSize="20" Glyph="&#x224B;" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Vent" TextAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton
+                            Grid.Column="3"
+                            AutomationProperties.Name="Désactivé"
+                            Click="OnOff"
+                            IsChecked="{x:Bind ViewModel.IsOff, Mode=OneWay}"
+                            IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
+                            Style="{StaticResource ModeTileStyle}">
+                            <ToggleButton.Resources>
+                                <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="OffBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="OffBrush" />
+                                <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="OffBrush" />
+                                <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="ModeInk" />
+                                <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="ModeInk" />
+                            </ToggleButton.Resources>
+                            <StackPanel Spacing="5">
+                                <FontIcon FontSize="18" Glyph="&#xE711;" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Aucun" TextAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                    </Grid>
+                </Border>
+                <TextBlock
+                    Margin="4,0"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ModeHint(ViewModel.IsConnected, ViewModel.IsNoiseCancelling, ViewModel.IsAmbient, ViewModel.IsWindReduction, ViewModel.IsOff), Mode=OneWay}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
 
-            <!-- Niveau du son ambiant, utile seulement en mode son ambiant -->
+            <!-- Son ambiant : réglable seulement en mode Son ambiant -->
             <Border
-                Padding="14,10"
+                Padding="14,10,14,8"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8"
+                CornerRadius="12"
                 Opacity="{x:Bind views:Ui.Dim(ViewModel.IsAmbient), Mode=OneWay}">
+                <Border.Resources>
+                    <StaticResource x:Key="SliderTrackValueFill" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="SliderTrackValueFillPointerOver" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="SliderTrackValueFillPressed" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="SliderThumbBackground" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="SliderThumbBackgroundPointerOver" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="SliderThumbBackgroundPressed" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOn" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPointerOver" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="ToggleSwitchFillOnPressed" ResourceKey="AmbientBrush" />
+                    <StaticResource x:Key="ToggleSwitchKnobFillOn" ResourceKey="ModeInk" />
+                    <StaticResource x:Key="ToggleSwitchKnobFillOnPointerOver" ResourceKey="ModeInk" />
+                    <StaticResource x:Key="ToggleSwitchKnobFillOnPressed" ResourceKey="ModeInk" />
+                </Border.Resources>
                 <StackPanel>
                     <Grid>
-                        <TextBlock Text="Niveau du son ambiant" />
+                        <TextBlock FontWeight="SemiBold" Text="Son ambiant" />
                         <TextBlock
                             HorizontalAlignment="Right"
+                            FontFamily="Cascadia Mono"
+                            FontSize="12"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.AmbientLevel, Mode=OneWay}" />
+                            Text="{x:Bind AmbientText(ViewModel.AmbientLevel), Mode=OneWay}" />
                     </Grid>
                     <Slider
+                        AutomationProperties.Name="Niveau du son ambiant"
                         IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                         Maximum="20"
                         Minimum="1"
                         StepFrequency="1"
                         Value="{x:Bind ViewModel.AmbientLevelValue, Mode=TwoWay}" />
                     <Grid>
-                        <TextBlock VerticalAlignment="Center" Text="Focus sur la voix" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind AmbientFoot(ViewModel.IsAmbient), Mode=OneWay}" />
                         <ToggleSwitch
                             MinWidth="0"
                             HorizontalAlignment="Right"
+                            AutomationProperties.Name="Voix en avant"
                             IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                             IsOn="{x:Bind ViewModel.FocusOnVoice, Mode=TwoWay}"
                             OffContent=""
@@ -111,36 +243,85 @@
                 </StackPanel>
             </Border>
 
-            <!-- Micro -->
-            <Border
-                Padding="14,10"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <FontIcon Glyph="&#xE720;" />
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Micro du casque" />
+            <!-- Deux bascules rapides : micro et Speak-to-Chat -->
+            <Grid ColumnSpacing="8">
+                <Grid.Resources>
+                    <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="ControlFillColorSecondaryBrush" />
+                    <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="ControlFillColorTertiaryBrush" />
+                    <StaticResource x:Key="ToggleButtonBackgroundCheckedPressed" ResourceKey="ControlFillColorTertiaryBrush" />
+                    <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="TextFillColorPrimaryBrush" />
+                    <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="TextFillColorPrimaryBrush" />
+                    <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="TextFillColorPrimaryBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushChecked" ResourceKey="ControlStrokeColorDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPointerOver" ResourceKey="ControlStrokeColorDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPressed" ResourceKey="ControlStrokeColorDefaultBrush" />
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <ToggleButton
+                    AutomationProperties.Name="Micro du casque"
+                    Click="OnToggleMic"
+                    IsChecked="{x:Bind ViewModel.MicEnabled, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.MicAvailable, Mode=OneWay}"
+                    Style="{StaticResource QuickTileStyle}">
+                    <StackPanel Spacing="3">
+                        <Grid Margin="0,0,0,4">
+                            <FontIcon HorizontalAlignment="Left" FontSize="16" Glyph="&#xE720;" />
+                            <Border
+                                Width="36"
+                                Height="20"
+                                Padding="3"
+                                HorizontalAlignment="Right"
+                                Background="{x:Bind TrackBrush(ViewModel.MicEnabled), Mode=OneWay}"
+                                CornerRadius="10">
+                                <Ellipse
+                                    Width="14"
+                                    Height="14"
+                                    HorizontalAlignment="{x:Bind KnobSide(ViewModel.MicEnabled), Mode=OneWay}"
+                                    Fill="{x:Bind KnobBrush(ViewModel.MicEnabled), Mode=OneWay}" />
+                            </Border>
+                        </Grid>
+                        <TextBlock FontWeight="SemiBold" Text="Micro" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="Coupé : stéréo HD en permanence" />
+                            Text="{x:Bind MicHint(ViewModel.MicEnabled), Mode=OneWay}" />
                     </StackPanel>
-                    <ToggleSwitch
-                        Grid.Column="2"
-                        MinWidth="0"
-                        IsEnabled="{x:Bind ViewModel.MicAvailable, Mode=OneWay}"
-                        IsOn="{x:Bind ViewModel.MicEnabled, Mode=TwoWay}"
-                        OffContent=""
-                        OnContent="" />
-                </Grid>
-            </Border>
+                </ToggleButton>
+                <ToggleButton
+                    Grid.Column="1"
+                    AutomationProperties.Name="Speak-to-Chat"
+                    Click="OnToggleSpeakToChat"
+                    IsChecked="{x:Bind ViewModel.SpeakToChat, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.HasSpeakToChat, Mode=OneWay}"
+                    Style="{StaticResource QuickTileStyle}">
+                    <StackPanel Spacing="3">
+                        <Grid Margin="0,0,0,4">
+                            <FontIcon HorizontalAlignment="Left" FontSize="16" Glyph="&#xE8BD;" />
+                            <Border
+                                Width="36"
+                                Height="20"
+                                Padding="3"
+                                HorizontalAlignment="Right"
+                                Background="{x:Bind TrackBrush(ViewModel.SpeakToChat), Mode=OneWay}"
+                                CornerRadius="10">
+                                <Ellipse
+                                    Width="14"
+                                    Height="14"
+                                    HorizontalAlignment="{x:Bind KnobSide(ViewModel.SpeakToChat), Mode=OneWay}"
+                                    Fill="{x:Bind KnobBrush(ViewModel.SpeakToChat), Mode=OneWay}" />
+                            </Border>
+                        </Grid>
+                        <TextBlock FontWeight="SemiBold" Text="Speak-to-Chat" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="Pause quand vous parlez" />
+                    </StackPanel>
+                </ToggleButton>
+            </Grid>
 
             <TextBlock
                 Foreground="{ThemeResource SystemFillColorCriticalBrush}"
@@ -148,18 +329,42 @@
                 TextWrapping="Wrap"
                 Visibility="{x:Bind views:Ui.Show(ViewModel.HasError), Mode=OneWay}" />
 
-            <!-- Pied : égaliseur et réglages -->
-            <Grid>
-                <Button Click="OnOpenEqualizer" IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+            <!-- Pied : égaliseur et fenêtre principale -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    MinHeight="44"
+                    Padding="12,4"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    AutomationProperties.Name="Égaliseur"
+                    Click="OnOpenEqualizer"
+                    CornerRadius="10"
+                    IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
                         <FontIcon FontSize="16" Glyph="&#xE9E9;" />
-                        <TextBlock Text="{x:Bind ViewModel.EqualizerLabel, Mode=OneWay}" />
+                        <StackPanel>
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Égaliseur" />
+                            <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.EqualizerLabel, Mode=OneWay}" />
+                        </StackPanel>
                     </StackPanel>
                 </Button>
-                <Button HorizontalAlignment="Right" Click="OnOpenSettings">
+                <Button
+                    Grid.Column="1"
+                    MinHeight="44"
+                    Padding="14,4"
+                    AutomationProperties.Name="Ouvrir XM4 Control"
+                    Click="OnOpenSettings"
+                    CornerRadius="10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="16" Glyph="&#xE713;" />
-                        <TextBlock Text="Réglages" />
+                        <TextBlock FontWeight="SemiBold" Text="Ouvrir XM4 Control" />
+                        <FontIcon FontSize="12" Glyph="&#xE8A7;" />
                     </StackPanel>
                 </Button>
             </Grid>

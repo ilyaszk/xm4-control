@@ -10,7 +10,8 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 </p>
 
 - **Fenêtre principale** : mode actuel et casque en 3D, réglages rapides, pages Son, Égaliseur, Casque et Application
-- **Popup au-dessus de l'horloge** : réduction de bruit / son ambiant / désactivé, niveau du son ambiant, micro, batterie
+- **Popup au-dessus de l'horloge** : mode actuel et batterie, réduction de bruit / son ambiant / vent / désactivé,
+  niveau du son ambiant, bascules Micro et Speak-to-Chat, accès direct à l'égaliseur
 - **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité
   (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
 - **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli
@@ -18,8 +19,8 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 - Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
   extinction automatique, pavé tactile, guide vocal, réduction du vent
 - Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
-- Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système) ; fenêtre principale en HTML/CSS
-  affichée par WebView2 (thème sombre, rendu du casque)
+- Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système), aux couleurs des modes de la
+  fenêtre principale ; fenêtre principale en HTML/CSS affichée par WebView2 (thème sombre, rendu du casque)
 - Outil en ligne de commande `xm4` pour les scripts
 
 ## Installation
@@ -35,7 +36,8 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 
 ## Utilisation
 
-- **Clic gauche** sur l'icône : popup rapide. **Clic droit** : menu (modes, micro, réglages, quitter).
+- **Clic gauche** sur l'icône (le logo, grisé quand le casque n'est pas connecté) : popup rapide.
+  **Clic droit** : menu (modes, micro, réglages, quitter).
 - **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
 - Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
 - `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
@@ -120,6 +122,9 @@ L'appli active ou désactive le service HFP (`0000111E-…`) du casque avec `Blu
 comme la case « Téléphonie mains libres » du Panneau de configuration. Pas besoin des droits administrateur.
 Si Windows le réactive (réappairage…), l'appli le recoupe à la connexion suivante.
 
+Le casque se reconnecte au PC par ce profil quand on l'allume : micro coupé, il ne se reconnecte donc plus tout
+seul. Il faut le reconnecter depuis *Paramètres > Bluetooth et appareils*.
+
 ### Sources
 
 - [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) : implémentation Android du protocole Sony
@@ -166,7 +171,7 @@ compris) : ses fichiers sont extraits dans un dossier temporaire au premier lanc
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
 dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-gh release create v2.1.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.1.0" --notes "..."
+gh release create v2.2.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.2.0" --notes "..."
 ```
 
 ## Licence

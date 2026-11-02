@@ -21,12 +21,31 @@
             <Color x:Key="SystemAccentColorDark2">#FF003E92</Color>
             <Color x:Key="SystemAccentColorDark3">#FF001A68</Color>
 
-            <!-- Tuile de mode du popup (réduction de bruit, son ambiant…). -->
+            <!-- Couleurs des modes, les mêmes que la fenêtre principale (Web/app.css). -->
+            <SolidColorBrush x:Key="ModeInk" Color="#FF0B0D10" />
+            <SolidColorBrush x:Key="NoiseBrush" Color="#FF8EC5FF" />
+            <SolidColorBrush x:Key="AmbientBrush" Color="#FFF2C27B" />
+            <SolidColorBrush x:Key="WindBrush" Color="#FF7FD8C8" />
+            <SolidColorBrush x:Key="OffBrush" Color="#FFA3ACB8" />
+
+            <!-- Tuile de mode du popup : transparente, remplie de la couleur du mode quand elle est active. -->
             <Style x:Key="ModeTileStyle" BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
-                <Setter Property="Height" Value="78" />
+                <Setter Property="Height" Value="62" />
                 <Setter Property="HorizontalAlignment" Value="Stretch" />
                 <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="10" />
                 <Setter Property="Padding" Value="2,4" />
+            </Style>
+
+            <!-- Bascule rapide du popup (micro, Speak-to-Chat) : l'état se lit sur le petit interrupteur dessiné. -->
+            <Style x:Key="QuickTileStyle" BasedOn="{StaticResource DefaultToggleButtonStyle}" TargetType="ToggleButton">
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Top" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Padding" Value="12,12,12,10" />
             </Style>
 
         </ResourceDictionary>

@@ -1,39 +1,40 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
+using Xm4Control.App.Views;
 
 namespace Xm4Control.App;
 
-/// <summary>Icône de la zone de notification : glyphe "casque" monochrome, comme les icônes système.</summary>
+/// <summary>Icône de la zone de notification : le logo de l'appli, atténué quand le casque n'est pas connecté.</summary>
 internal static class TrayIcons
 {
     private const int Size = 32;
-    private static readonly string Headphone = MainViewModel.Glyph(0xE7F6);
-    private static readonly string? GlyphFont = FindFont("Segoe Fluent Icons", "Segoe MDL2 Assets");
+    private const float DisconnectedOpacity = 0.4f;
 
     public static Icon Create(bool connected)
     {
-        var color = TaskbarIsLight() ? Color.Black : Color.White;
-        if (!connected) color = Color.FromArgb(110, color);
+        // Choisit l'image de app.ico la plus proche de la taille demandée.
+        using var logo = new Icon(Ui.IconPath, Size, Size);
+        using var source = logo.ToBitmap();
+        if (connected) return (Icon)logo.Clone();
 
         using var bitmap = new Bitmap(Size, Size);
         using (var g = Graphics.FromImage(bitmap))
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            using var brush = new SolidBrush(color);
-            if (GlyphFont is null)
-            {
-                g.FillEllipse(brush, 2, 2, Size - 4, Size - 4);
-            }
-            else
-            {
-                using var font = new Font(GlyphFont, Size * 0.85f, GraphicsUnit.Pixel);
-                using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString(Headphone, font, brush, new RectangleF(0, 1, Size, Size), format);
-            }
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            // Niveaux de gris et transparence : même convention que les icônes système hors ligne.
+            var matrix = new ColorMatrix(
+            [
+                [0.3f, 0.3f, 0.3f, 0, 0],
+                [0.59f, 0.59f, 0.59f, 0, 0],
+                [0.11f, 0.11f, 0.11f, 0, 0],
+                [0, 0, 0, DisconnectedOpacity, 0],
+                [0, 0, 0, 0, 1],
+            ]);
+            using var attributes = new ImageAttributes();
+            attributes.SetColorMatrix(matrix);
+            g.DrawImage(source, new Rectangle(0, 0, Size, Size), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
         }
 
         var handle = bitmap.GetHicon();
@@ -45,16 +46,6 @@ internal static class TrayIcons
         {
             DestroyIcon(handle);
         }
-    }
-
-    private static bool TaskbarIsLight() =>
-        Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
-            "SystemUsesLightTheme", 0) is 1;
-
-    private static string? FindFont(params string[] names)
-    {
-        using var fonts = new InstalledFontCollection();
-        return names.FirstOrDefault(name => fonts.Families.Any(f => f.Name == name));
     }
 
     [DllImport("user32.dll")]

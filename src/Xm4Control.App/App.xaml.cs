@@ -5,7 +5,6 @@ using H.NotifyIcon.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.UI.ViewManagement;
 using Xm4Control.App.Views;
 using Xm4Control.Core;
 using Xm4Control.Core.Protocol;
@@ -18,7 +17,6 @@ public partial class App : Application
     private readonly EventWaitHandle _showRequested;
     private readonly string[] _args;
     private readonly MemoryTrimmer _trimmer;
-    private readonly UISettings _uiSettings = new();
     private DispatcherQueue _dispatcher = null!;
     private RegisteredWaitHandle? _showRegistration;
     private TextWriter? _log;
@@ -72,13 +70,6 @@ public partial class App : Application
         _hotkey = new GlobalHotkey();
         _hotkey.Pressed += () => _ = ViewModel.CycleModeAsync();
         ApplyHotkeySetting();
-
-        // Thème clair/sombre de la barre des tâches changé : on redessine l'icône (événement hors thread UI).
-        _uiSettings.ColorValuesChanged += (_, _) => _dispatcher.TryEnqueue(() =>
-        {
-            _iconConnected = null;
-            UpdateTray();
-        });
 
         _showRegistration = ThreadPool.RegisterWaitForSingleObject(
             _showRequested, (_, _) => _dispatcher.TryEnqueue(() => ShowSettings()), null, Timeout.Infinite, executeOnlyOnce: false);
