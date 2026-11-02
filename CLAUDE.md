@@ -15,7 +15,7 @@ pour le protocole et la publication d'une version.
 
 ## Appli (WinUI 3)
 
-- Non empaquetée, runtime Windows App SDK embarqué, exe unique élagué et compressé (~35 Mo). Les composants IA,
+- Non empaquetée, runtime Windows App SDK embarqué, exe unique élagué et compressé (~40 Mo). Les composants IA,
   ML, recherche et widgets du Windows App SDK sont exclus (`ExcludeAssets="all"`) : sinon l'exe fait 300 Mo.
 - Élagage (trimming) : pas de réflexion. Le JSON des réglages passe par le générateur de sources (`SettingsJson`).
 - `Program.cs` remplace le Main généré (instance unique) ; `DispatcherShutdownMode.OnExplicitShutdown`.

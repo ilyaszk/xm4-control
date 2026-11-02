@@ -6,14 +6,15 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 
 <p>
   <img src="docs/flyout.png" alt="Popup au-dessus de l'horloge" height="300">
-  <img src="docs/settings.png" alt="Fenêtre Réglages" height="300">
+  <img src="docs/main.png" alt="Fenêtre principale : mode actuel, casque en 3D, réglages rapides" height="300">
 </p>
 
+- **Fenêtre principale** : mode actuel et casque en 3D, réglages rapides, pages Son, Égaliseur, Casque et Application
 - **Popup au-dessus de l'horloge** : réduction de bruit / son ambiant / désactivé, niveau du son ambiant, micro, batterie
 - **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité
   (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
 - **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli
-- **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris
+- **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris (glisser ou molette)
 - Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
   extinction automatique, pavé tactile, guide vocal, réduction du vent
 - Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
@@ -24,7 +25,8 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 ## Installation
 
 Télécharger `Xm4Control.exe` dans les [Releases](https://github.com/ilyaszk/xm4-control/releases) et le lancer.
-Rien d'autre à installer : l'exe embarque .NET. Au premier lancement, Windows SmartScreen peut afficher
+Rien d'autre à installer : l'exe embarque .NET, et la fenêtre principale utilise WebView2, déjà présent dans
+Windows 11. Au premier lancement, Windows SmartScreen peut afficher
 « Windows a protégé votre ordinateur » (l'exe n'est pas signé) : *Informations complémentaires > Exécuter quand même*.
 
 Le casque doit être appairé dans *Paramètres > Bluetooth et appareils* ; l'appli s'y connecte toute seule dès
@@ -34,7 +36,8 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 ## Utilisation
 
 - **Clic gauche** sur l'icône : popup rapide. **Clic droit** : menu (modes, micro, réglages, quitter).
-- La fenêtre principale se ferme (et libère sa mémoire) quand on la ferme ; l'appli reste dans la zone de notification.
+- **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
+- Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
 - `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
 
 **Ligne de commande** (`xm4.exe`, aussi dans les Releases) :
@@ -156,14 +159,14 @@ dotnet test
 ```
 
 Publier une version (la version est dans `Directory.Build.props`). L'appli est non empaquetée (pas de MSIX),
-avec le runtime Windows App SDK embarqué, élaguée et compressée en un seul exe (environ 35 Mo) : ses fichiers sont
-extraits dans un dossier temporaire au premier lancement.
+avec le runtime Windows App SDK embarqué, élaguée et compressée en un seul exe (environ 40 Mo, page web et modèle 3D
+compris) : ses fichiers sont extraits dans un dossier temporaire au premier lancement.
 
 ```powershell
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
 dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-gh release create v2.0.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.0.0" --notes "..."
+gh release create v2.1.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.1.0" --notes "..."
 ```
 
 ## Licence
