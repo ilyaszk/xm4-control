@@ -165,15 +165,27 @@ dotnet build
 dotnet test
 ```
 
-Publier une version (la version est dans `Directory.Build.props`). L'appli est non empaquetée (pas de MSIX),
-avec le runtime Windows App SDK embarqué, élaguée et compressée en un seul exe (environ 40 Mo, page web et modèle 3D
-compris) : ses fichiers sont extraits dans un dossier temporaire au premier lancement.
+GitHub Actions (`.github/workflows/build.yml`) compile, teste et produit les deux exe à chaque push : ils se
+téléchargent depuis l'exécution (artefact `xm4-control`, gardé 30 jours). Pour publier une version, changer la
+version dans `Directory.Build.props`, commiter, puis pousser un tag du même numéro :
+
+```powershell
+git tag v2.4.0
+git push origin master v2.4.0
+```
+
+L'action crée alors la release avec les deux exe. Ses notes listent les commits depuis la version précédente,
+suivis de la description de `.github/release-notes.md`. Si la release existe déjà (notes rédigées à la main),
+l'action y dépose seulement les exe.
+
+L'appli est non empaquetée (pas de MSIX), avec le runtime Windows App SDK embarqué, élaguée et compressée en un
+seul exe (environ 40 Mo, page web et modèle 3D compris) : ses fichiers sont extraits dans un dossier temporaire au
+premier lancement. Pour compiler les exe en local, comme le fait l'action :
 
 ```powershell
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
 dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-gh release create v2.3.1 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.3.1" --notes "..."
 ```
 
 ## Licence

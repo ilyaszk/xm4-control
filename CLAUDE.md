@@ -11,7 +11,9 @@ pour le protocole et la publication d'une version.
   (`--log` : trace des trames dans `%LOCALAPPDATA%\Xm4Control\trace.log`, `--tray` : sans fenêtre).
 - Tester sur le vrai casque avec la CLI : `src/Xm4Control.Cli/bin/Debug/net10.0-windows/xm4.exe status -v`
   (l'appli ne doit pas tourner : une seule connexion RFCOMM à la fois ; espacer les appels de quelques secondes).
-- Version : `Directory.Build.props`. Release : `dotnet publish ... -p:Platform=x64 -o publish` puis `gh release create`.
+- Version : `Directory.Build.props`. Release : GitHub Actions (`.github/workflows/build.yml`) la publie quand on
+  pousse un tag `v<version>` identique ; notes = commits depuis le tag précédent + `.github/release-notes.md`
+  (description complète de l'appli, à tenir à jour avec le README).
 
 ## Appli (WinUI 3)
 

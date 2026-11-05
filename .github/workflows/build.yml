@@ -1,0 +1,92 @@
+# Compile et teste à chaque push ; un tag v* publie en plus la release avec les deux exe.
+name: Build
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Vérifie que le tag correspond à la version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $version = (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText
+          if ("v$version" -ne $env:TAG) {
+            throw "Le tag $env:TAG ne correspond pas à la version $version de Directory.Build.props."
+          }
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Tests
+        run: dotnet test
+
+      - name: Publie l'appli
+        run: dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
+
+      - name: Publie la ligne de commande
+        run: >
+          dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -o publish
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: xm4-control
+          path: |
+            publish/Xm4Control.exe
+            publish/xm4.exe
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: xm4-control
+          path: publish
+
+      - name: Publie la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Release déjà créée à la main (notes rédigées) : on y dépose seulement les exe.
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" publish/Xm4Control.exe publish/xm4.exe --clobber
+            exit 0
+          fi
+          # Sinon : commits depuis la version précédente, puis la description de .github/release-notes.md.
+          previous=$(git describe --tags --abbrev=0 "$TAG^" 2> /dev/null || true)
+          {
+            echo "## Nouveautés de la version ${TAG#v}"
+            echo
+            git log --no-merges --format='- %s' "${previous:+$previous..}$TAG"
+            echo
+            echo '---'
+            echo
+            sed "s|{{tag}}|$TAG|g" .github/release-notes.md
+          } > notes.md
+          gh release create "$TAG" publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control ${TAG#v}" --notes-file notes.md
