@@ -5,6 +5,7 @@ using H.NotifyIcon.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.UI.ViewManagement;
 using Xm4Control.App.Views;
 using Xm4Control.Core;
 using Xm4Control.Core.Protocol;
@@ -17,6 +18,7 @@ public partial class App : Application
     private readonly EventWaitHandle _showRequested;
     private readonly string[] _args;
     private readonly MemoryTrimmer _trimmer;
+    private readonly UISettings _uiSettings = new();
     private DispatcherQueue _dispatcher = null!;
     private RegisteredWaitHandle? _showRegistration;
     private TextWriter? _log;
@@ -26,7 +28,7 @@ public partial class App : Application
     private GlobalHotkey? _hotkey;
     private FlyoutWindow? _flyout;
     private SettingsWindow? _settingsWindow;
-    private bool? _iconConnected;
+    private TrayIcons.Look? _iconLook;
 
     internal App(EventWaitHandle showRequested, string[] args)
     {
@@ -70,6 +72,9 @@ public partial class App : Application
         _hotkey = new GlobalHotkey();
         _hotkey.Pressed += () => _ = ViewModel.CycleModeAsync();
         ApplyHotkeySetting();
+
+        // Thème clair/sombre de la barre des tâches changé : l'icône change de couleur (événement hors thread UI).
+        _uiSettings.ColorValuesChanged += (_, _) => _dispatcher.TryEnqueue(UpdateTray);
 
         _showRegistration = ThreadPool.RegisterWaitForSingleObject(
             _showRequested, (_, _) => _dispatcher.TryEnqueue(() => ShowSettings()), null, Timeout.Infinite, executeOnlyOnce: false);
@@ -140,10 +145,11 @@ public partial class App : Application
         if (_tray is null) return;
         _tray.ToolTipText = ViewModel.Summary;
         _menu?.Update(ViewModel);
-        if (ViewModel.IsConnected == _iconConnected) return;
-        _iconConnected = ViewModel.IsConnected;
+        var look = TrayIcons.LookFor(ViewModel.HasBattery ? (int)ViewModel.BatteryLevel : null);
+        if (look == _iconLook) return;
+        _iconLook = look;
         var previous = _tray.Icon;
-        _tray.Icon = TrayIcons.Create(ViewModel.IsConnected);
+        _tray.Icon = TrayIcons.Create(look);
         previous?.Dispose();
     }
 

@@ -37,6 +37,9 @@ pour le protocole et la publication d'une version.
   - les fichiers `Content` (icône) doivent avoir `CopyToPublishDirectory` ;
   - H.NotifyIcon n'accepte qu'une `System.Drawing.Icon` pour une icône générée ; menus natifs sombres via
     `Ui.FollowSystemThemeInMenus` (uxtheme, non documenté).
+- Icône de notification (`TrayIcons`) : pile dessinée en GDI+ à la taille des petites icônes de la barre des
+  tâches (DPI de `Shell_TrayWnd`), blanche ou noire selon `SystemUsesLightTheme` ; redessinée seulement quand
+  `TrayIcons.Look` (niveau, thème, taille) change.
 - Mémoire : fenêtres créées à la demande, Réglages détruite à la fermeture ; `MemoryTrimmer` nettoie 10 s puis
   60 s après le retour en arrière-plan (WinUI relâche des ressources en différé). ~3-8 Mo au repos.
 - Glyphes Segoe Fluent Icons : en XAML `&#xE7F6;`, en C# `MainViewModel.Glyph(0xE7F6)`. Ne pas écrire `""` :

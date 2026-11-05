@@ -18,7 +18,8 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
 - **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris (glisser ou molette)
 - Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
   extinction automatique, pavé tactile, guide vocal, réduction du vent
-- Notification quand la batterie passe sous 20 %, lancement au démarrage de Windows
+- Niveau de batterie dans l'icône de notification, alerte quand il passe sous 20 %, lancement au démarrage
+  de Windows
 - Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système), aux couleurs des modes de la
   fenêtre principale ; fenêtre principale en HTML/CSS affichée par WebView2 (thème sombre, rendu du casque)
 - Outil en ligne de commande `xm4` pour les scripts
@@ -36,7 +37,8 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 
 ## Utilisation
 
-- **Clic gauche** sur l'icône (le logo, grisé quand le casque n'est pas connecté) : popup rapide.
+- **Clic gauche** sur l'icône (une pile avec le niveau de batterie du casque, rouge à 20 % et moins, vide et
+  atténuée quand le casque n'est pas connecté) : popup rapide.
   **Clic droit** : menu (modes, micro, réglages, quitter).
 - **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
 - Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
@@ -171,7 +173,7 @@ compris) : ses fichiers sont extraits dans un dossier temporaire au premier lanc
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
 dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-gh release create v2.2.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.2.0" --notes "..."
+gh release create v2.3.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.3.0" --notes "..."
 ```
 
 ## Licence
