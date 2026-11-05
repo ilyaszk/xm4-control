@@ -95,6 +95,13 @@ public partial class App : Application
         _flyout.Toggle();
     }
 
+    // Double-clic sur l'icône : le premier clic a déjà ouvert le popup, il laisse la place à la fenêtre principale.
+    private void OpenSettingsFromTray()
+    {
+        _flyout?.HideFlyout();
+        ShowSettings();
+    }
+
     // La fenêtre Réglages est détruite à sa fermeture, et recréée à la demande.
     internal void ShowSettings(string? page = null)
     {
@@ -135,6 +142,7 @@ public partial class App : Application
             MenuActivation = PopupActivationMode.RightClick,
             NoLeftClickDelay = true,
             LeftClickCommand = new ActionCommand(ToggleFlyout),
+            DoubleClickCommand = new ActionCommand(OpenSettingsFromTray),
         };
         UpdateTray();
         _tray.ForceCreate(enablesEfficiencyMode: false);

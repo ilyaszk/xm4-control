@@ -77,7 +77,7 @@ public sealed partial class FlyoutWindow : Window
         Ui.BringToFront(this);
     }
 
-    private void HideFlyout()
+    internal void HideFlyout()
     {
         if (!AppWindow.IsVisible) return;
         AppWindow.Hide();

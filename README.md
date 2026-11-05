@@ -38,7 +38,7 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 ## Utilisation
 
 - **Clic gauche** sur l'icône (une pile avec le niveau de batterie du casque, rouge à 20 % et moins, vide et
-  atténuée quand le casque n'est pas connecté) : popup rapide.
+  atténuée quand le casque n'est pas connecté) : popup rapide. **Double-clic** : fenêtre principale.
   **Clic droit** : menu (modes, micro, réglages, quitter).
 - **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
 - Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
@@ -173,7 +173,7 @@ compris) : ses fichiers sont extraits dans un dossier temporaire au premier lanc
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
 dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
-gh release create v2.3.0 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.3.0" --notes "..."
+gh release create v2.3.1 publish/Xm4Control.exe publish/xm4.exe --title "XM4 Control 2.3.1" --notes "..."
 ```
 
 ## Licence
