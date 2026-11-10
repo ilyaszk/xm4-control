@@ -6,7 +6,7 @@ public sealed record PairedDevice(ulong Address, string Name, bool Connected)
 {
     public string AddressText => string.Join(":", BitConverter.GetBytes(Address).Take(6).Reverse().Select(b => b.ToString("X2")));
 
-    public override string ToString() => $"{Name} ({AddressText}){(Connected ? " - connecté" : "")}";
+    public override string ToString() => $"{Name} ({AddressText}){(Connected ? Lang.T(" - connecté", " - connected") : "")}";
 }
 
 public static class PairedDevices

@@ -45,7 +45,9 @@ public static class HandsFreeProfile
                 case BluetoothNative.EInvalidArg: // déjà dans l'état demandé
                     continue;
                 case BluetoothNative.ErrorAccessDenied:
-                    throw new UnauthorizedAccessException("Droits administrateur requis pour changer le profil mains libres.");
+                    throw new UnauthorizedAccessException(Lang.T(
+                        "Droits administrateur requis pour changer le profil mains libres.",
+                        "Administrator rights are required to change the hands-free profile."));
                 default:
                     // Pour HSP, "service inexistant" est normal (le XM4 n'expose que HFP).
                     if (service == Headset) continue;

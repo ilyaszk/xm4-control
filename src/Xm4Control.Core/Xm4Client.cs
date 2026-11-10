@@ -58,7 +58,9 @@ public sealed class Xm4Client(PairedDevice device) : IDisposable
         await SendAsync(Commands.Init(), TimeSpan.FromMilliseconds(300), 10, ct);
         await _initReply.Task.WaitAsync(InitTimeout, ct);
         if (State.ProtocolVersion != 1)
-            throw new NotSupportedException("Ce casque utilise le protocole Sony v2, non pris en charge.");
+            throw new NotSupportedException(Lang.T(
+                "Ce casque utilise le protocole Sony v2, non pris en charge.",
+                "These headphones use Sony protocol v2, which isn't supported."));
 
         foreach (var query in Commands.InitialQueries())
             await SendAsync(query, ct);
@@ -87,7 +89,9 @@ public sealed class Xm4Client(PairedDevice device) : IDisposable
                     Trace?.Invoke($"Pas d'ACK pour {request}");
                 }
             }
-            throw new TimeoutException("Le casque n'a pas accusé réception de la commande.");
+            throw new TimeoutException(Lang.T(
+                "Le casque n'a pas accusé réception de la commande.",
+                "The headphones didn't acknowledge the command."));
         }
         finally
         {
@@ -140,7 +144,7 @@ public sealed class Xm4Client(PairedDevice device) : IDisposable
         {
         }
 
-        var lost = new IOException("Connexion au casque perdue.");
+        var lost = new IOException(Lang.T("Connexion au casque perdue.", "Lost the connection to the headphones."));
         _initReply.TrySetException(lost);
         Interlocked.Exchange(ref _pendingAck, null)?.TrySetException(lost);
         if (Interlocked.Exchange(ref _disposed, 1) == 0)

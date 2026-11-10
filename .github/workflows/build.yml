@@ -78,12 +78,19 @@ jobs:
             gh release upload "$TAG" publish/Xm4Control.exe publish/xm4.exe --clobber
             exit 0
           fi
-          # Sinon : commits depuis la version précédente, puis la description de .github/release-notes.md.
+          # Sinon : nouveautés, puis la description de .github/release-notes.md. Les nouveautés sont le message du
+          # tag annoté (git tag -a, en anglais), ou à défaut les commits depuis la version précédente.
+          # actions/checkout peut remplacer un tag annoté par un tag léger : on récupère à nouveau les tags.
+          git fetch --tags --force --quiet
           previous=$(git describe --tags --abbrev=0 "$TAG^" 2> /dev/null || true)
           {
-            echo "## Nouveautés de la version ${TAG#v}"
+            echo "## What's new in ${TAG#v}"
             echo
-            git log --no-merges --format='- %s' "${previous:+$previous..}$TAG"
+            if [ "$(git cat-file -t "$TAG")" = tag ]; then
+              git tag -l --format='%(contents)' "$TAG"
+            else
+              git log --no-merges --format='- %s' "${previous:+$previous..}$TAG"
+            fi
             echo
             echo '---'
             echo

@@ -28,7 +28,7 @@
                     <Ellipse Margin="-6" Fill="{x:Bind ModeGlow(ViewModel.IsConnected, ViewModel.IsNoiseCancelling, ViewModel.IsAmbient, ViewModel.IsWindReduction), Mode=OneWay}" />
                     <Image
                         x:Name="Headset"
-                        AutomationProperties.Name="Casque Sony WH-1000XM4"
+                        AutomationProperties.Name="{x:Bind HeadsetText}"
                         Opacity="{x:Bind views:Ui.Dim(ViewModel.IsConnected), Mode=OneWay}"
                         Stretch="Uniform" />
                 </Grid>
@@ -98,7 +98,7 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <ToggleButton
-                            AutomationProperties.Name="Réduction de bruit"
+                            AutomationProperties.Name="{x:Bind NoiseCancellingText}"
                             Click="OnNoiseCancelling"
                             IsChecked="{x:Bind ViewModel.IsNoiseCancelling, Mode=OneWay}"
                             IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
@@ -113,12 +113,12 @@
                             </ToggleButton.Resources>
                             <StackPanel Spacing="5">
                                 <FontIcon FontSize="18" Glyph="&#xE7F6;" />
-                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Bruit" TextAlignment="Center" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="{x:Bind NoiseTile}" TextAlignment="Center" />
                             </StackPanel>
                         </ToggleButton>
                         <ToggleButton
                             Grid.Column="1"
-                            AutomationProperties.Name="Son ambiant"
+                            AutomationProperties.Name="{x:Bind AmbientSoundText}"
                             Click="OnAmbient"
                             IsChecked="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                             IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
@@ -133,12 +133,12 @@
                             </ToggleButton.Resources>
                             <StackPanel Spacing="5">
                                 <FontIcon FontSize="18" Glyph="&#xE767;" />
-                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Ambiant" TextAlignment="Center" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="{x:Bind AmbientTile}" TextAlignment="Center" />
                             </StackPanel>
                         </ToggleButton>
                         <ToggleButton
                             Grid.Column="2"
-                            AutomationProperties.Name="Réduction du vent"
+                            AutomationProperties.Name="{x:Bind WindText}"
                             Click="OnWindReduction"
                             IsChecked="{x:Bind ViewModel.IsWindReduction, Mode=OneWay}"
                             IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
@@ -154,12 +154,12 @@
                             <StackPanel Spacing="5">
                                 <!-- Pas de pictogramme "vent" dans Segoe Fluent Icons : ≋ de Segoe UI Symbol. -->
                                 <FontIcon FontFamily="Segoe UI Symbol" FontSize="20" Glyph="&#x224B;" />
-                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Vent" TextAlignment="Center" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="{x:Bind WindTile}" TextAlignment="Center" />
                             </StackPanel>
                         </ToggleButton>
                         <ToggleButton
                             Grid.Column="3"
-                            AutomationProperties.Name="Désactivé"
+                            AutomationProperties.Name="{x:Bind OffText}"
                             Click="OnOff"
                             IsChecked="{x:Bind ViewModel.IsOff, Mode=OneWay}"
                             IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}"
@@ -174,7 +174,7 @@
                             </ToggleButton.Resources>
                             <StackPanel Spacing="5">
                                 <FontIcon FontSize="18" Glyph="&#xE711;" />
-                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="Aucun" TextAlignment="Center" />
+                                <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="{x:Bind OffTile}" TextAlignment="Center" />
                             </StackPanel>
                         </ToggleButton>
                     </Grid>
@@ -211,7 +211,7 @@
                 </Border.Resources>
                 <StackPanel>
                     <Grid>
-                        <TextBlock FontWeight="SemiBold" Text="Son ambiant" />
+                        <TextBlock FontWeight="SemiBold" Text="{x:Bind AmbientSoundText}" />
                         <TextBlock
                             HorizontalAlignment="Right"
                             FontFamily="Cascadia Mono"
@@ -220,7 +220,7 @@
                             Text="{x:Bind AmbientText(ViewModel.AmbientLevel), Mode=OneWay}" />
                     </Grid>
                     <Slider
-                        AutomationProperties.Name="Niveau du son ambiant"
+                        AutomationProperties.Name="{x:Bind AmbientLevelText}"
                         IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                         Maximum="20"
                         Minimum="1"
@@ -234,7 +234,7 @@
                         <ToggleSwitch
                             MinWidth="0"
                             HorizontalAlignment="Right"
-                            AutomationProperties.Name="Voix en avant"
+                            AutomationProperties.Name="{x:Bind FocusOnVoiceText}"
                             IsEnabled="{x:Bind ViewModel.IsAmbient, Mode=OneWay}"
                             IsOn="{x:Bind ViewModel.FocusOnVoice, Mode=TwoWay}"
                             OffContent=""
@@ -261,7 +261,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <ToggleButton
-                    AutomationProperties.Name="Micro du casque"
+                    AutomationProperties.Name="{x:Bind MicName}"
                     Click="OnToggleMic"
                     IsChecked="{x:Bind ViewModel.MicEnabled, Mode=OneWay}"
                     IsEnabled="{x:Bind ViewModel.MicAvailable, Mode=OneWay}"
@@ -283,7 +283,7 @@
                                     Fill="{x:Bind KnobBrush(ViewModel.MicEnabled), Mode=OneWay}" />
                             </Border>
                         </Grid>
-                        <TextBlock FontWeight="SemiBold" Text="Micro" />
+                        <TextBlock FontWeight="SemiBold" Text="{x:Bind MicTile}" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}"
@@ -318,7 +318,7 @@
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="Pause quand vous parlez" />
+                            Text="{x:Bind SpeakToChatHint}" />
                     </StackPanel>
                 </ToggleButton>
             </Grid>
@@ -340,7 +340,7 @@
                     Padding="12,4"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Left"
-                    AutomationProperties.Name="Égaliseur"
+                    AutomationProperties.Name="{x:Bind EqualizerText}"
                     Click="OnOpenEqualizer"
                     CornerRadius="10"
                     IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
@@ -350,7 +350,7 @@
                             <TextBlock
                                 FontSize="11"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="Égaliseur" />
+                                Text="{x:Bind EqualizerText}" />
                             <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.EqualizerLabel, Mode=OneWay}" />
                         </StackPanel>
                     </StackPanel>
@@ -359,11 +359,11 @@
                     Grid.Column="1"
                     MinHeight="44"
                     Padding="14,4"
-                    AutomationProperties.Name="Ouvrir XM4 Control"
+                    AutomationProperties.Name="{x:Bind OpenAppText}"
                     Click="OnOpenSettings"
                     CornerRadius="10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock FontWeight="SemiBold" Text="Ouvrir XM4 Control" />
+                        <TextBlock FontWeight="SemiBold" Text="{x:Bind OpenAppText}" />
                         <FontIcon FontSize="12" Glyph="&#xE8A7;" />
                     </StackPanel>
                 </Button>

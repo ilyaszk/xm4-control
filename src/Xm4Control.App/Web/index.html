@@ -7,17 +7,21 @@
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<!--
+  Page écrite en français ; en anglais (?lang=en), app.js remplace le texte d'un élément par son attribut data-en,
+  et ses attributs (aria-label, alt) par data-en-aria-label, data-en-alt. Un élément traduit ne contient que du texte.
+-->
 <div class="aura" aria-hidden="true"></div>
 
 <div class="shell">
   <header class="top">
     <div class="brand"><b>XM4</b><span>Control</span></div>
     <nav class="tabs" aria-label="Navigation">
-      <button class="tab" data-view="home">Accueil</button>
-      <button class="tab" data-view="sound">Son</button>
-      <button class="tab" data-view="eq">Égaliseur</button>
-      <button class="tab" data-view="headset">Casque</button>
-      <button class="tab" data-view="app">Application</button>
+      <button class="tab" data-view="home" data-en="Home">Accueil</button>
+      <button class="tab" data-view="sound" data-en="Sound">Son</button>
+      <button class="tab" data-view="eq" data-en="Equalizer">Égaliseur</button>
+      <button class="tab" data-view="headset" data-en="Headphones">Casque</button>
+      <button class="tab" data-view="app" data-en="App">Application</button>
     </nav>
     <div class="top-pills">
       <span class="pill-info"><span class="dot"></span><span data-text="statusText"></span></span>
@@ -34,31 +38,31 @@
       <span data-text="disconnectedHint"></span>
     </div>
     <div class="banner error" id="banner-error" role="alert" hidden>
-      <strong>Erreur</strong>
+      <strong data-en="Error">Erreur</strong>
       <span data-text="error"></span>
     </div>
 
     <!-- ============ Accueil ============ -->
-    <section class="view studio" id="view-home" aria-label="Accueil">
-      <div class="stage" aria-label="Casque en 3D : glisser pour le faire tourner, double-clic pour revenir">
+    <section class="view studio" id="view-home" aria-label="Accueil" data-en-aria-label="Home">
+      <div class="stage" aria-label="Casque en 3D : glisser pour le faire tourner, double-clic pour revenir" data-en-aria-label="3D headphones: drag to rotate, double-click to reset">
         <div class="rings" aria-hidden="true"><span></span><span></span></div>
-        <img id="headset-img" class="headset" src="headset.png" alt="Casque Sony WH-1000XM4" draggable="false">
-        <canvas id="headset-3d" tabindex="0" aria-label="Casque en 3D, flèches pour le faire tourner" hidden></canvas>
-        <span class="stage-hint">Glisser pour tourner · double-clic pour revenir</span>
+        <img id="headset-img" class="headset" src="headset.png" alt="Casque Sony WH-1000XM4" data-en-alt="Sony WH-1000XM4 headphones" draggable="false">
+        <canvas id="headset-3d" tabindex="0" aria-label="Casque en 3D, flèches pour le faire tourner" data-en-aria-label="3D headphones, arrow keys to rotate" hidden></canvas>
+        <span class="stage-hint" data-en="Drag to rotate · double-click to reset">Glisser pour tourner · double-clic pour revenir</span>
       </div>
 
       <div class="headline">
-        <span class="eyebrow">Mode actuel</span>
+        <span class="eyebrow" data-en="Current mode">Mode actuel</span>
         <h1 id="mode-title">—</h1>
         <p id="mode-hint" class="muted"></p>
       </div>
 
       <div class="glass ambient" id="ambient-card">
         <div class="row between">
-          <h2>Son ambiant</h2>
+          <h2 data-en="Ambient sound">Son ambiant</h2>
           <span class="mono muted small">1–20</span>
         </div>
-        <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Niveau du son ambiant" aria-valuemin="1" aria-valuemax="20">
+        <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Niveau du son ambiant" data-en-aria-label="Ambient sound level" aria-valuemin="1" aria-valuemax="20">
           <svg viewBox="0 0 168 168" aria-hidden="true">
             <circle cx="84" cy="84" r="70" class="dial-track"/>
             <circle cx="84" cy="84" r="70" class="dial-fill" id="dial-fill"/>
@@ -69,112 +73,112 @@
           </div>
         </div>
         <div class="row center">
-          <button class="round" id="ambient-down" aria-label="Baisser le son ambiant">−</button>
-          <button class="chip" role="switch" data-switch="focusOnVoice" aria-label="Voix en avant">Voix en avant</button>
-          <button class="round" id="ambient-up" aria-label="Monter le son ambiant">+</button>
+          <button class="round" id="ambient-down" aria-label="Baisser le son ambiant" data-en-aria-label="Lower ambient sound">−</button>
+          <button class="chip" role="switch" data-switch="focusOnVoice" aria-label="Voix en avant" data-en-aria-label="Focus on voice" data-en="Focus on voice">Voix en avant</button>
+          <button class="round" id="ambient-up" aria-label="Monter le son ambiant" data-en-aria-label="Raise ambient sound">+</button>
         </div>
-        <p class="ambient-hint">Réglable en mode Son ambiant</p>
+        <p class="ambient-hint" data-en="Adjustable in Ambient sound mode">Réglable en mode Son ambiant</p>
       </div>
 
       <div class="features">
         <button class="glass feature" role="switch" data-switch="speakToChat">
-          <span><b>Speak-to-Chat</b><small>Met en pause quand vous parlez</small></span><i class="toggle" aria-hidden="true"></i>
+          <span><b>Speak-to-Chat</b><small data-en="Pauses when you talk">Met en pause quand vous parlez</small></span><i class="toggle" aria-hidden="true"></i>
         </button>
         <button class="glass feature" role="switch" data-switch="dsee">
-          <span><b>DSEE Extreme</b><small>Améliore la musique compressée</small></span><i class="toggle" aria-hidden="true"></i>
+          <span><b>DSEE Extreme</b><small data-en="Enhances compressed music">Améliore la musique compressée</small></span><i class="toggle" aria-hidden="true"></i>
         </button>
         <button class="glass feature" role="switch" data-switch="pauseWhenTakenOff">
-          <span><b>Pause au retrait</b><small>Pause quand vous l'enlevez</small></span><i class="toggle" aria-hidden="true"></i>
+          <span><b data-en="Pause when taken off">Pause au retrait</b><small data-en="Pauses when you take them off">Pause quand vous l'enlevez</small></span><i class="toggle" aria-hidden="true"></i>
         </button>
         <button class="glass feature" role="switch" data-switch="autoPowerOff">
-          <span><b>Extinction auto</b><small>S'éteint s'il n'est pas porté</small></span><i class="toggle" aria-hidden="true"></i>
+          <span><b data-en="Auto power off">Extinction auto</b><small data-en="Turns off when not worn">S'éteint s'il n'est pas porté</small></span><i class="toggle" aria-hidden="true"></i>
         </button>
         <button class="glass feature" role="switch" data-switch="mic">
-          <span><b>Micro du casque</b><small id="mic-hint"></small></span><i class="toggle" aria-hidden="true"></i>
+          <span><b data-en="Headphones mic">Micro du casque</b><small id="mic-hint"></small></span><i class="toggle" aria-hidden="true"></i>
         </button>
         <button class="glass eq-link" data-go="eq">
-          <span class="row between"><b>Égaliseur</b><span class="tint"><span id="home-preset"></span> →</span></span>
+          <span class="row between"><b data-en="Equalizer">Égaliseur</b><span class="tint"><span id="home-preset"></span> →</span></span>
           <svg class="mini-curve" viewBox="0 0 300 54" preserveAspectRatio="none" aria-hidden="true">
             <path class="mini-line" id="mini-line"/>
           </svg>
         </button>
       </div>
 
-      <div class="dock" role="radiogroup" aria-label="Mode audio">
+      <div class="dock" role="radiogroup" aria-label="Mode audio" data-en-aria-label="Audio mode">
         <button class="dock-btn" role="radio" data-mode="nc">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="2"/><rect x="17" y="14" width="4" height="7" rx="2"/></svg>
-          <b>Réduction de bruit</b><small>Coupe les bruits autour</small></button>
+          <b data-en="Noise cancelling">Réduction de bruit</b><small data-en="Blocks out the noise">Coupe les bruits autour</small></button>
         <button class="dock-btn" role="radio" data-mode="ambient">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-          <b>Son ambiant</b><small>Laisse entrer l'extérieur</small></button>
+          <b data-en="Ambient sound">Son ambiant</b><small data-en="Lets the outside in">Laisse entrer l'extérieur</small></button>
         <button class="dock-btn" role="radio" data-mode="wind">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h16a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg>
-          <b>Réduction du vent</b><small>Pour marcher dehors</small></button>
+          <b data-en="Wind noise reduction">Réduction du vent</b><small data-en="For walking outdoors">Pour marcher dehors</small></button>
         <button class="dock-btn" role="radio" data-mode="off">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          <b>Désactivé</b><small>Son naturel, sans traitement</small></button>
+          <b data-en="Off">Désactivé</b><small data-en="Natural sound, no processing">Son naturel, sans traitement</small></button>
       </div>
     </section>
 
     <!-- ============ Son ambiant ============ -->
-    <section class="view" id="view-sound" aria-label="Son ambiant" hidden>
-      <header class="page-head"><div class="eyebrow">Son</div><h1>Son ambiant</h1></header>
+    <section class="view" id="view-sound" aria-label="Son ambiant" data-en-aria-label="Ambient sound" hidden>
+      <header class="page-head"><div class="eyebrow" data-en="Sound">Son</div><h1 data-en="Ambient sound">Son ambiant</h1></header>
 
-      <div class="segmented big" role="radiogroup" aria-label="Mode audio">
+      <div class="segmented big" role="radiogroup" aria-label="Mode audio" data-en-aria-label="Audio mode">
         <button class="seg" role="radio" data-mode="nc">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="2"/><rect x="17" y="14" width="4" height="7" rx="2"/></svg>
-          <b>Réduction de bruit</b><span>Isolation maximale</span></button>
+          <b data-en="Noise cancelling">Réduction de bruit</b><span data-en="Maximum isolation">Isolation maximale</span></button>
         <button class="seg" role="radio" data-mode="ambient">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-          <b>Son ambiant</b><span>Entendre autour</span></button>
+          <b data-en="Ambient sound">Son ambiant</b><span data-en="Hear your surroundings">Entendre autour</span></button>
         <button class="seg" role="radio" data-mode="wind">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h16a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg>
-          <b>Réduction du vent</b><span>En extérieur</span></button>
+          <b data-en="Wind noise reduction">Réduction du vent</b><span data-en="Outdoors">En extérieur</span></button>
         <button class="seg" role="radio" data-mode="off">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          <b>Désactivé</b><span>Son naturel</span></button>
+          <b data-en="Off">Désactivé</b><span data-en="Natural sound">Son naturel</span></button>
       </div>
 
       <div class="grid2">
         <div class="card">
           <div class="row between">
-            <h2>Niveau du son ambiant</h2>
+            <h2 data-en="Ambient sound level">Niveau du son ambiant</h2>
             <span class="mono muted"><span data-text="ambientLevel"></span> / 20</span>
           </div>
-          <p class="muted small">Quantité de son extérieur laissée passer, en mode Son ambiant.</p>
-          <label class="sr" for="sound-ambient">Niveau du son ambiant</label>
+          <p class="muted small" data-en="How much outside sound gets through, in Ambient sound mode.">Quantité de son extérieur laissée passer, en mode Son ambiant.</p>
+          <label class="sr" for="sound-ambient" data-en="Ambient sound level">Niveau du son ambiant</label>
           <input type="range" id="sound-ambient" class="range" min="1" max="20" step="1" data-range="ambientLevel">
           <div class="row between">
-            <div><div>Voix en avant</div><div class="muted small">Laisse passer les voix en atténuant les autres bruits.</div></div>
-            <button class="switch" role="switch" aria-label="Voix en avant" data-switch="focusOnVoice"></button>
+            <div><div data-en="Focus on voice">Voix en avant</div><div class="muted small" data-en="Lets voices through while turning down other noise.">Laisse passer les voix en atténuant les autres bruits.</div></div>
+            <button class="switch" role="switch" aria-label="Voix en avant" data-en-aria-label="Focus on voice" data-switch="focusOnVoice"></button>
           </div>
         </div>
 
         <div class="card">
-          <h2>Optimiseur de réduction de bruit</h2>
-          <p class="muted small">Adapte la réduction de bruit à votre tête, vos lunettes et à la pression atmosphérique (avion). Portez le casque et restez immobile une quinzaine de secondes.</p>
+          <h2 data-en="NC Optimizer">Optimiseur de réduction de bruit</h2>
+          <p class="muted small" data-en="Tunes noise cancelling to your head, your glasses and the atmospheric pressure (on a plane). Wear the headphones and keep still for about fifteen seconds.">Adapte la réduction de bruit à votre tête, vos lunettes et à la pression atmosphérique (avion). Portez le casque et restez immobile une quinzaine de secondes.</p>
           <div class="row between">
             <span class="accent" data-text="optimizerStatus"></span>
-            <button class="btn" id="optimizer-btn" data-cmd="optimizer">Lancer</button>
+            <button class="btn" id="optimizer-btn" data-cmd="optimizer"></button>
           </div>
         </div>
 
         <div class="card span2 row between">
           <div>
-            <h2>Micro du casque</h2>
-            <p class="muted small">Coupé, le casque reste en stéréo haute qualité : Windows ne le bascule plus en mode « téléphone » quand une appli ouvre le micro (Teams, Discord…), mais son micro n'est plus utilisable.</p>
+            <h2 data-en="Headphones mic">Micro du casque</h2>
+            <p class="muted small" data-en="When off, the headphones stay in high-quality stereo: Windows no longer switches them to “phone call” mode when an app opens the microphone (Teams, Discord…), but their mic can't be used.">Coupé, le casque reste en stéréo haute qualité : Windows ne le bascule plus en mode « téléphone » quand une appli ouvre le micro (Teams, Discord…), mais son micro n'est plus utilisable.</p>
           </div>
-          <button class="switch" role="switch" aria-label="Micro du casque" data-switch="mic"></button>
+          <button class="switch" role="switch" aria-label="Micro du casque" data-en-aria-label="Headphones mic" data-switch="mic"></button>
         </div>
       </div>
     </section>
 
     <!-- ============ Égaliseur ============ -->
-    <section class="view" id="view-eq" aria-label="Égaliseur" hidden>
-      <header class="page-head"><div class="eyebrow">Son</div><h1>Égaliseur</h1></header>
-      <div class="pills" id="presets" role="radiogroup" aria-label="Préréglage"></div>
+    <section class="view" id="view-eq" aria-label="Égaliseur" data-en-aria-label="Equalizer" hidden>
+      <header class="page-head"><div class="eyebrow" data-en="Sound">Son</div><h1 data-en="Equalizer">Égaliseur</h1></header>
+      <div class="pills" id="presets" role="radiogroup" aria-label="Préréglage" data-en-aria-label="Preset"></div>
       <div class="card eq-card">
-        <svg class="eq" id="eq" viewBox="0 0 1000 360" aria-label="Courbe d'égalisation, faites glisser les points" role="img">
+        <svg class="eq" id="eq" viewBox="0 0 1000 360" aria-label="Courbe d'égalisation, faites glisser les points" data-en-aria-label="Equalizer curve, drag the points" role="img">
           <defs>
             <linearGradient id="eqfill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" class="eq-stop-top"/>
@@ -187,108 +191,112 @@
           <g id="eq-points"></g>
         </svg>
       </div>
-      <p class="muted small">Faites glisser les points ou utilisez la molette. Toucher aux bandes passe en préréglage Manuel, comme dans l'appli Sony.</p>
+      <p class="muted small" data-en="Drag the points or use the scroll wheel. Changing a band switches to the Manual preset, as in the Sony app.">Faites glisser les points ou utilisez la molette. Toucher aux bandes passe en préréglage Manuel, comme dans l'appli Sony.</p>
     </section>
 
     <!-- ============ Casque ============ -->
-    <section class="view" id="view-headset" aria-label="Casque" hidden>
-      <header class="page-head"><div class="eyebrow">Réglages</div><h1>Casque</h1></header>
+    <section class="view" id="view-headset" aria-label="Casque" data-en-aria-label="Headphones" hidden>
+      <header class="page-head"><div class="eyebrow" data-en="Settings">Réglages</div><h1 data-en="Headphones">Casque</h1></header>
       <div class="stats">
-        <div class="card stat"><div class="eyebrow">Appareil</div><div class="stat-value" data-text="deviceName"></div></div>
-        <div class="card stat"><div class="eyebrow">Batterie</div><div class="stat-value" id="stat-battery"></div></div>
+        <div class="card stat"><div class="eyebrow" data-en="Device">Appareil</div><div class="stat-value" data-text="deviceName"></div></div>
+        <div class="card stat"><div class="eyebrow" data-en="Battery">Batterie</div><div class="stat-value" id="stat-battery"></div></div>
         <div class="card stat"><div class="eyebrow">Codec</div><div class="stat-value" data-text="codec"></div></div>
         <div class="card stat"><div class="eyebrow">Firmware</div><div class="stat-value" data-text="firmware"></div></div>
       </div>
 
       <div class="list">
         <div class="item">
-          <div><div class="item-title">DSEE Extreme</div><div class="muted small">Restaure les détails perdus par la compression de la musique.</div></div>
+          <div><div class="item-title">DSEE Extreme</div><div class="muted small" data-en="Restores the detail lost when music is compressed.">Restaure les détails perdus par la compression de la musique.</div></div>
           <button class="switch" role="switch" aria-label="DSEE Extreme" data-switch="dsee"></button>
         </div>
         <div class="item-group">
           <div class="item">
-            <div><div class="item-title">Speak-to-Chat</div><div class="muted small">Met la musique en pause et laisse passer le son quand vous parlez.</div></div>
+            <div><div class="item-title">Speak-to-Chat</div><div class="muted small" data-en="Pauses the music and lets sound through when you talk.">Met la musique en pause et laisse passer le son quand vous parlez.</div></div>
             <button class="switch" role="switch" aria-label="Speak-to-Chat" data-switch="speakToChat"></button>
           </div>
           <div class="sub" id="s2c-config">
             <div class="item">
-              <div><div>Sensibilité de détection de la voix</div><div class="muted small">Élevée : réagit même quand vous parlez doucement.</div></div>
-              <select class="select" aria-label="Sensibilité" data-select="sensitivityIndex" data-options="sensitivities" data-cmd="sensitivity"></select>
+              <div><div data-en="Voice detection sensitivity">Sensibilité de détection de la voix</div><div class="muted small" data-en="High: reacts even when you speak softly.">Élevée : réagit même quand vous parlez doucement.</div></div>
+              <select class="select" aria-label="Sensibilité" data-en-aria-label="Sensitivity" data-select="sensitivityIndex" data-options="sensitivities" data-cmd="sensitivity"></select>
             </div>
             <div class="item">
-              <div><div>Fin du mode conversation</div><div class="muted small">Délai sans parole avant que la musique reprenne.</div></div>
-              <select class="select" aria-label="Fin du mode conversation" data-select="timeoutIndex" data-options="timeouts" data-cmd="timeout"></select>
+              <div><div data-en="End of conversation mode">Fin du mode conversation</div><div class="muted small" data-en="How long without talking before the music resumes.">Délai sans parole avant que la musique reprenne.</div></div>
+              <select class="select" aria-label="Fin du mode conversation" data-en-aria-label="End of conversation mode" data-select="timeoutIndex" data-options="timeouts" data-cmd="timeout"></select>
             </div>
             <div class="item">
-              <div><div>Focus sur la voix pendant la conversation</div><div class="muted small">Met en avant les voix dans le son ambiant laissé passer.</div></div>
-              <button class="switch" role="switch" aria-label="Focus sur la voix pendant la conversation" data-switch="speakToChatVoiceFocus"></button>
+              <div><div data-en="Voice focus during conversation">Focus sur la voix pendant la conversation</div><div class="muted small" data-en="Brings voices forward in the ambient sound let through.">Met en avant les voix dans le son ambiant laissé passer.</div></div>
+              <button class="switch" role="switch" aria-label="Focus sur la voix pendant la conversation" data-en-aria-label="Voice focus during conversation" data-switch="speakToChatVoiceFocus"></button>
             </div>
           </div>
         </div>
         <div class="item">
-          <div><div class="item-title">Pause au retrait du casque</div><div class="muted small">Met la lecture en pause quand vous enlevez le casque.</div></div>
-          <button class="switch" role="switch" aria-label="Pause au retrait du casque" data-switch="pauseWhenTakenOff"></button>
+          <div><div class="item-title" data-en="Pause when taken off">Pause au retrait du casque</div><div class="muted small" data-en="Pauses playback when you take the headphones off.">Met la lecture en pause quand vous enlevez le casque.</div></div>
+          <button class="switch" role="switch" aria-label="Pause au retrait du casque" data-en-aria-label="Pause when taken off" data-switch="pauseWhenTakenOff"></button>
         </div>
         <div class="item">
-          <div><div class="item-title">Extinction automatique</div><div class="muted small">Le casque s'éteint tout seul quand vous ne le portez plus.</div></div>
-          <button class="switch" role="switch" aria-label="Extinction automatique" data-switch="autoPowerOff"></button>
+          <div><div class="item-title" data-en="Automatic power off">Extinction automatique</div><div class="muted small" data-en="The headphones turn off on their own when you're not wearing them.">Le casque s'éteint tout seul quand vous ne le portez plus.</div></div>
+          <button class="switch" role="switch" aria-label="Extinction automatique" data-en-aria-label="Automatic power off" data-switch="autoPowerOff"></button>
         </div>
         <div class="item">
-          <div><div class="item-title">Pavé tactile</div><div class="muted small">Commandes tactiles sur l'écouteur droit.</div></div>
-          <button class="switch" role="switch" aria-label="Pavé tactile" data-switch="touchSensor"></button>
+          <div><div class="item-title" data-en="Touch panel">Pavé tactile</div><div class="muted small" data-en="Touch controls on the right earcup.">Commandes tactiles sur l'écouteur droit.</div></div>
+          <button class="switch" role="switch" aria-label="Pavé tactile" data-en-aria-label="Touch panel" data-switch="touchSensor"></button>
         </div>
         <div class="item">
-          <div><div class="item-title">Guide vocal</div><div class="muted small">Annonces vocales du casque (connexion, batterie, mode…).</div></div>
-          <button class="switch" role="switch" aria-label="Guide vocal" data-switch="voiceGuidance"></button>
+          <div><div class="item-title" data-en="Voice guidance">Guide vocal</div><div class="muted small" data-en="Spoken announcements from the headphones (connection, battery, mode…).">Annonces vocales du casque (connexion, batterie, mode…).</div></div>
+          <button class="switch" role="switch" aria-label="Guide vocal" data-en-aria-label="Voice guidance" data-switch="voiceGuidance"></button>
         </div>
       </div>
-      <button class="btn danger" id="power-off">Éteindre le casque</button>
+      <button class="btn danger" id="power-off" data-en="Turn off the headphones">Éteindre le casque</button>
     </section>
 
     <!-- ============ Application ============ -->
-    <section class="view" id="view-app" aria-label="Application" hidden>
-      <header class="page-head"><div class="eyebrow">Réglages</div><h1>Application</h1></header>
+    <section class="view" id="view-app" aria-label="Application" data-en-aria-label="App" hidden>
+      <header class="page-head"><div class="eyebrow" data-en="Settings">Réglages</div><h1 data-en="App">Application</h1></header>
       <div class="list">
         <div class="item">
-          <div><div class="item-title">Lancer au démarrage de Windows</div><div class="muted small">L'appli démarre dans la zone de notification, sans fenêtre.</div></div>
-          <button class="switch" role="switch" aria-label="Lancer au démarrage de Windows" data-switch="startWithWindows"></button>
+          <div><div class="item-title" data-en="Language · Langue">Langue · Language</div><div class="muted small" data-en="Language of XM4 Control's windows, menu and notifications.">Langue des fenêtres, du menu et des notifications de XM4 Control.</div></div>
+          <select class="select" aria-label="Langue" data-en-aria-label="Language" data-select="languageIndex" data-options="languages" data-cmd="language"></select>
+        </div>
+        <div class="item">
+          <div><div class="item-title" data-en="Start with Windows">Lancer au démarrage de Windows</div><div class="muted small" data-en="The app starts in the system tray, without a window.">L'appli démarre dans la zone de notification, sans fenêtre.</div></div>
+          <button class="switch" role="switch" aria-label="Lancer au démarrage de Windows" data-en-aria-label="Start with Windows" data-switch="startWithWindows"></button>
         </div>
         <div class="item">
           <div>
-            <div class="item-title">Raccourci clavier <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd></div>
-            <div class="muted small">Depuis n'importe quelle appli : réduction de bruit → son ambiant → désactivé.</div>
+            <div class="item-title"><span data-en="Keyboard shortcut">Raccourci clavier</span> <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd></div>
+            <div class="muted small" data-en="From any app: noise cancelling → ambient sound → off.">Depuis n'importe quelle appli : réduction de bruit → son ambiant → désactivé.</div>
             <div class="critical small" data-text="hotkeyError"></div>
           </div>
-          <button class="switch" role="switch" aria-label="Raccourci clavier" data-switch="hotkeyEnabled" data-cmd="hotkey"></button>
+          <button class="switch" role="switch" aria-label="Raccourci clavier" data-en-aria-label="Keyboard shortcut" data-switch="hotkeyEnabled" data-cmd="hotkey"></button>
         </div>
         <div class="item">
-          <div><div class="item-title">Alerte batterie faible</div><div class="muted small">Notification Windows quand la batterie du casque passe sous 20 %.</div></div>
-          <button class="switch" role="switch" aria-label="Alerte batterie faible" data-switch="lowBatteryAlert"></button>
+          <div><div class="item-title" data-en="Low battery alert">Alerte batterie faible</div><div class="muted small" data-en="Windows notification when the headphones battery drops to 20%.">Notification Windows quand la batterie du casque passe sous 20 %.</div></div>
+          <button class="switch" role="switch" aria-label="Alerte batterie faible" data-en-aria-label="Low battery alert" data-switch="lowBatteryAlert"></button>
         </div>
       </div>
 
-      <h2 class="section">À propos</h2>
+      <h2 class="section" data-en="About">À propos</h2>
       <div class="list">
         <div class="item">
-          <div><div class="item-title">XM4 Control <span class="muted" data-text="version"></span></div><div class="muted small">Contrôle du Sony WH-1000XM4 sous Windows, sans l'appli mobile. Logiciel libre sous licence MIT, non affilié à Sony.</div></div>
-          <a class="link" href="https://github.com/ilyaszk/xm4-control">Code source sur GitHub</a>
+          <div><div class="item-title">XM4 Control <span class="muted" data-text="version"></span></div><div class="muted small" data-en="Control your Sony WH-1000XM4 from Windows, without the mobile app. Free software under the MIT license, not affiliated with Sony.">Contrôle du Sony WH-1000XM4 sous Windows, sans l'appli mobile. Logiciel libre sous licence MIT, non affilié à Sony.</div></div>
+          <a class="link" href="https://github.com/ilyaszk/xm4-control" data-en="Source code on GitHub">Code source sur GitHub</a>
         </div>
         <div class="item">
-          <div><div class="item-title">Modèle 3D du casque</div><div class="muted small">Casque 3D de l'accueil tiré du modèle « SONY headphone WH-1000XM4 » de Chizuko V, sous licence CC BY 4.0.</div></div>
-          <a class="link" href="https://sketchfab.com/3d-models/sony-headphone-wh-1000xm4-f90f76c75d8143eb97eb49844050aa26">Voir sur Sketchfab</a>
+          <div><div class="item-title" data-en="3D headphones model">Modèle 3D du casque</div><div class="muted small" data-en="The 3D headphones on the Home page come from the “SONY headphone WH-1000XM4” model by Chizuko V, licensed under CC BY 4.0.">Casque 3D de l'accueil tiré du modèle « SONY headphone WH-1000XM4 » de Chizuko V, sous licence CC BY 4.0.</div></div>
+          <a class="link" href="https://sketchfab.com/3d-models/sony-headphone-wh-1000xm4-f90f76c75d8143eb97eb49844050aa26" data-en="View on Sketchfab">Voir sur Sketchfab</a>
         </div>
       </div>
-      <button class="btn" data-cmd="quit">Quitter XM4 Control</button>
+      <button class="btn" data-cmd="quit" data-en="Quit XM4 Control">Quitter XM4 Control</button>
     </section>
   </main>
 </div>
 
 <dialog id="confirm-power">
-  <h2>Éteindre le casque</h2>
-  <p class="muted">Le casque va s'éteindre. Il faudra le rallumer avec son bouton.</p>
+  <h2 data-en="Turn off the headphones">Éteindre le casque</h2>
+  <p class="muted" data-en="The headphones will turn off. You'll need to turn them back on with their button.">Le casque va s'éteindre. Il faudra le rallumer avec son bouton.</p>
   <div class="row end">
-    <button class="btn" id="confirm-cancel">Annuler</button>
-    <button class="btn primary" id="confirm-ok">Éteindre</button>
+    <button class="btn" id="confirm-cancel" data-en="Cancel">Annuler</button>
+    <button class="btn primary" id="confirm-ok" data-en="Turn off">Éteindre</button>
   </div>
 </dialog>
 

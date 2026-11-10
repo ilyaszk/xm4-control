@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Xm4Control.Core;
 using Xm4Control.Core.Protocol;
+using static Xm4Control.Core.Lang;
 
 namespace Xm4Control.App;
 
@@ -36,26 +37,33 @@ public sealed class MainViewModel : INotifyPropertyChanged
     /// <summary>Le raccourci global a été activé ou désactivé dans les réglages.</summary>
     public event Action? HotkeySettingChanged;
 
+    /// <summary>La langue de l'interface vient de changer : les textes fixes des fenêtres sont à relire.</summary>
+    public event Action? LanguageChanged;
+
     private Xm4State State => _headset.State;
 
     public bool IsConnected => _headset.Status == ConnectionStatus.Connected;
     public string DeviceName => _headset.Device?.Name ?? "WH-1000XM4";
     public string Summary => _headset.Summary;
     public string StatusText => IsConnected
-        ? string.Join(" · ", new[] { "Connecté", State.Codec }.Where(s => s is not null))
+        ? string.Join(" · ", new[] { T("Connecté", "Connected"), State.Codec }.Where(s => s is not null))
         : _headset.StatusText;
     public string Error => _headset.Error ?? "";
     public bool HasError => _headset.Error is not null;
     public bool ShowDisconnected => !IsConnected;
     public string DisconnectedHint => _headset.Status switch
     {
-        ConnectionStatus.NoDevice => "Appairez-le dans Paramètres > Bluetooth et appareils.",
+        ConnectionStatus.NoDevice => T(
+            "Appairez-le dans Paramètres > Bluetooth et appareils.",
+            "Pair them in Settings > Bluetooth & devices."),
         ConnectionStatus.Connecting or ConnectionStatus.Searching => "",
-        _ => "Allumez-le ou connectez-le à ce PC : l'appli s'y connecte toute seule.",
+        _ => T(
+            "Allumez-le ou connectez-le à ce PC : l'appli s'y connecte toute seule.",
+            "Turn them on or connect them to this PC: the app connects on its own."),
     };
 
     public bool HasBattery => IsConnected && State.Battery.HasValue;
-    public string BatteryText => State.Battery is { } b ? $"{b} %" : "";
+    public string BatteryText => State.Battery is { } b ? Percent(b) : "";
     public double BatteryLevel => State.Battery ?? 0;
     public bool IsCharging => State.Charging;
 
@@ -70,7 +78,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public string Firmware => State.Firmware ?? "—";
     public string Codec => State.Codec ?? "—";
-    public string BatteryDetail => State.Battery is { } b ? $"{b} %{(State.Charging ? " (en charge)" : "")}" : "—";
+    public string BatteryDetail => State.Battery is { } b
+        ? Percent(b) + (State.Charging ? T(" (en charge)", " (charging)") : "")
+        : "—";
 
     // --- Son ambiant ---
 
@@ -124,7 +134,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         or NcOptimizerStatus.MeasuringPressure or NcOptimizerStatus.Analyzing;
     public string OptimizerStatus => Labels.Of(State.NcOptimizer);
     public bool HasOptimizerStatus => IsConnected && OptimizerStatus.Length > 0;
-    public string OptimizerButtonText => IsOptimizing ? "Arrêter" : "Lancer";
+    public string OptimizerButtonText => IsOptimizing ? T("Arrêter", "Stop") : T("Lancer", "Start");
 
     public Task ToggleOptimizerAsync()
     {
@@ -147,7 +157,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     // --- Égaliseur ---
 
-    public IReadOnlyList<string> PresetLabels { get; } = [.. Enum.GetValues<EqPreset>().Select(Labels.Of)];
+    public IReadOnlyList<string> PresetLabels => [.. Enum.GetValues<EqPreset>().Select(Labels.Of)];
 
     public int PresetIndex
     {
@@ -159,7 +169,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public string EqualizerLabel => State.EqPreset is { } p ? Labels.Of(p) : "Égaliseur";
+    public string EqualizerLabel => State.EqPreset is { } p ? Labels.Of(p) : T("Égaliseur", "Equalizer");
 
     public IReadOnlyList<int> EqualizerBands
     {
@@ -195,10 +205,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
     /// <summary>Les réglages de Speak-to-Chat ne servent que si la fonction est active.</summary>
     public bool HasSpeakToChatConfig => HasSpeakToChat && SpeakToChat && State.SpeakToChatConfig.HasValue;
 
-    public IReadOnlyList<string> SensitivityLabels { get; } =
+    public IReadOnlyList<string> SensitivityLabels =>
         [.. Enum.GetValues<SpeakToChatSensitivity>().Select(Labels.Of)];
 
-    public IReadOnlyList<string> TimeoutLabels { get; } =
+    public IReadOnlyList<string> TimeoutLabels =>
         [.. Enum.GetValues<SpeakToChatTimeout>().Select(Labels.Of)];
 
     public int SensitivityIndex
@@ -325,6 +335,25 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _settings.LowBatteryAlert = value;
             _settings.Save();
             OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Choix de la page Application, dans l'ordre de <see cref="LanguageLabels"/> (null : langue de Windows).</summary>
+    private static readonly string?[] LanguageCodes = [null, "fr", "en"];
+
+    public IReadOnlyList<string> LanguageLabels => [T("Langue de Windows", "Windows language"), "Français", "English"];
+
+    public int LanguageIndex
+    {
+        get => Math.Max(0, Array.IndexOf(LanguageCodes, _settings.Language));
+        set
+        {
+            if (value < 0 || value >= LanguageCodes.Length || value == LanguageIndex) return;
+            _settings.Language = LanguageCodes[value];
+            _settings.Save();
+            Lang.Set(_settings.Language);
+            LanguageChanged?.Invoke();
+            OnPropertyChanged(string.Empty);
         }
     }
 

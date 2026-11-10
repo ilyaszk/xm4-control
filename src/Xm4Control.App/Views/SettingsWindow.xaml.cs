@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 using Windows.Graphics;
 using Windows.System;
+using Xm4Control.Core;
 
 namespace Xm4Control.App.Views;
 
@@ -50,9 +51,11 @@ public sealed partial class SettingsWindow : Window
             size.Height));
 
         _viewModel.PropertyChanged += OnViewModelChanged;
+        _viewModel.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) =>
         {
             _viewModel.PropertyChanged -= OnViewModelChanged;
+            _viewModel.LanguageChanged -= OnLanguageChanged;
             Web.Close();
         };
         _ = InitializeWebAsync();
@@ -98,7 +101,19 @@ public sealed partial class SettingsWindow : Window
         };
         core.NewWindowRequested += (_, e) => e.Handled = true;
         core.WebMessageReceived += OnWebMessage;
-        core.Navigate($"https://{HostName}/index.html");
+        core.Navigate(PageUri);
+    }
+
+    // La page est écrite dans les deux langues : elle affiche celle passée dans l'adresse.
+    private static string PageUri => $"https://{HostName}/index.html?lang={Lang.Code}";
+
+    /// <summary>Langue changée depuis la page Application : la page se recharge dans la nouvelle langue, sur cette page.</summary>
+    private void OnLanguageChanged()
+    {
+        if (Web.CoreWebView2 is not { } core) return;
+        _ready = false;
+        _pendingPage = "app";
+        core.Navigate(PageUri);
     }
 
     private void OnWebMessage(CoreWebView2 sender, CoreWebView2WebMessageReceivedEventArgs e)

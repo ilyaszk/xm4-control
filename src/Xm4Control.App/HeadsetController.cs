@@ -2,6 +2,7 @@ using System.IO;
 using Xm4Control.Core;
 using Xm4Control.Core.Bluetooth;
 using Xm4Control.Core.Protocol;
+using static Xm4Control.Core.Lang;
 
 namespace Xm4Control.App;
 
@@ -60,14 +61,16 @@ internal sealed class HeadsetController : IDisposable
 
     public string StatusText => Status switch
     {
-        ConnectionStatus.Searching => "Recherche du casque…",
-        ConnectionStatus.NoDevice => "Aucun WH-1000XM4 appairé à ce PC",
-        ConnectionStatus.NotConnected => "Casque non connecté",
-        ConnectionStatus.Connecting => "Connexion…",
+        ConnectionStatus.Searching => T("Recherche du casque…", "Looking for the headphones…"),
+        ConnectionStatus.NoDevice => T("Aucun WH-1000XM4 appairé à ce PC", "No WH-1000XM4 paired with this PC"),
+        ConnectionStatus.NotConnected => T("Casque non connecté", "Headphones not connected"),
+        ConnectionStatus.Connecting => T("Connexion…", "Connecting…"),
         _ => string.Join(" · ", new[]
         {
-            "Connecté",
-            State.Battery is { } b ? $"batterie {b} %{(State.Charging ? " (en charge)" : "")}" : null,
+            T("Connecté", "Connected"),
+            State.Battery is { } b
+                ? T("batterie ", "battery ") + Percent(b) + (State.Charging ? T(" (en charge)", " (charging)") : "")
+                : null,
             State.Codec,
             State.Firmware is { } fw ? $"firmware {fw}" : null,
         }.Where(s => s is not null)),
@@ -79,9 +82,9 @@ internal sealed class HeadsetController : IDisposable
         {
             Device?.Name,
             State.Ambient is { } a ? Labels.Of(a.Mode) : null,
-            State.Battery is { } b ? $"{b} %" : null,
+            State.Battery is { } b ? Percent(b) : null,
         }.Where(s => s is not null))
-        : $"WH-1000XM4 : {StatusText.ToLowerInvariant()}";
+        : T("WH-1000XM4 : ", "WH-1000XM4: ") + char.ToLowerInvariant(StatusText[0]) + StatusText[1..];
 
     public Task SetAmbientModeAsync(AmbientMode mode) =>
         RunAsync(c => c.SetAmbientAsync(new AmbientSettings(mode, _settings.AmbientLevel, _settings.FocusOnVoice)));
@@ -131,7 +134,7 @@ internal sealed class HeadsetController : IDisposable
         }
         catch (Exception ex)
         {
-            Error = $"Micro : {ex.Message}";
+            Error = T($"Micro : {ex.Message}", $"Mic: {ex.Message}");
         }
         await RefreshMicAsync();
     }
@@ -196,7 +199,7 @@ internal sealed class HeadsetController : IDisposable
         {
             client.Dispose();
             _nextConnectAttempt = DateTime.UtcNow + RetryDelay;
-            Error = $"Connexion impossible : {ex.Message}";
+            Error = T($"Connexion impossible : {ex.Message}", $"Can't connect: {ex.Message}");
             SetStatus(ConnectionStatus.NotConnected);
             return;
         }
@@ -247,7 +250,7 @@ internal sealed class HeadsetController : IDisposable
         catch (Exception ex)
         {
             MicEnabled = null;
-            Error = $"Micro : {ex.Message}";
+            Error = T($"Micro : {ex.Message}", $"Mic: {ex.Message}");
         }
         Raise();
     }

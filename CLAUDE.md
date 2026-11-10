@@ -8,13 +8,15 @@ l'appli), `README.fr.md` en est la version française : toujours modifier les de
 
 - `dotnet build` / `dotnet test` depuis la racine du projet (pas besoin de Visual Studio).
 - L'exe de l'appli verrouille sa sortie : arrêter `Xm4Control` (`Stop-Process -Name Xm4Control`) avant de recompiler.
-- Exe de debug : `src/Xm4Control.App/bin/x64/Debug/net10.0-windows10.0.26100.0/win-x64/Xm4Control.exe`
-  (`--log` : trace des trames dans `%LOCALAPPDATA%\Xm4Control\trace.log`, `--tray` : sans fenêtre).
+- Exe de debug (`dotnet build` sans plateforme) : `src/Xm4Control.App/bin/Debug/net10.0-windows10.0.26100.0/win-x64/Xm4Control.exe`
+  (`--log` : trace des trames dans `%LOCALAPPDATA%\Xm4Control\trace.log`, `--tray` : sans fenêtre). Le dossier
+  `bin/x64/Debug` vient d'anciennes compilations avec `-p:Platform=x64` et n'est plus à jour.
 - Tester sur le vrai casque avec la CLI : `src/Xm4Control.Cli/bin/Debug/net10.0-windows/xm4.exe status -v`
   (l'appli ne doit pas tourner : une seule connexion RFCOMM à la fois ; espacer les appels de quelques secondes).
 - Version : `Directory.Build.props`. Release : GitHub Actions (`.github/workflows/build.yml`) la publie quand on
-  pousse un tag `v<version>` identique ; notes = commits depuis le tag précédent + `.github/release-notes.md`
-  (description complète de l'appli, à tenir à jour avec le README).
+  pousse un tag `v<version>` identique, annoté (`git tag -a`) avec les nouveautés en anglais ; notes = message du
+  tag (à défaut, commits depuis le tag précédent) + `.github/release-notes.md` (description complète de l'appli,
+  en anglais, à tenir à jour avec le README).
 
 ## Appli (WinUI 3)
 
@@ -40,6 +42,9 @@ l'appli), `README.fr.md` en est la version française : toujours modifier les de
   - les fichiers `Content` (icône) doivent avoir `CopyToPublishDirectory` ;
   - H.NotifyIcon n'accepte qu'une `System.Drawing.Icon` pour une icône générée ; menus natifs sombres via
     `Ui.FollowSystemThemeInMenus` (uxtheme, non documenté).
+- Changement de langue (page Application) : `MainViewModel.LanguageChanged` ; la page web se recharge avec
+  `?lang=`, le popup réévalue ses liaisons (`Bindings.Update`), le menu de l'icône reprend ses textes à chaque
+  mise à jour. Les textes fixes du popup sont des propriétés de `FlyoutWindow` liées par x:Bind.
 - Icône de notification (`TrayIcons`) : pile dessinée en GDI+ à la taille des petites icônes de la barre des
   tâches (DPI de `Shell_TrayWnd`), blanche ou noire selon `SystemUsesLightTheme` ; redessinée seulement quand
   `TrayIcons.Look` (niveau, thème, taille) change.
@@ -50,7 +55,10 @@ l'appli), `README.fr.md` en est la version française : toujours modifier les de
 
 ## Règles
 
-- Textes visibles (UI, CLI, messages d'erreur) et commentaires en français ; identifiants en anglais.
+- Textes visibles (UI, CLI, messages d'erreur) en français et en anglais, côte à côte : `T("Bruit", "Noise")`
+  en C# (`Lang`, langue de Windows ou réglage `Language`), attributs `data-en` / `data-en-<attribut>` dans
+  `Web/index.html` (`WebPageTests` vérifie qu'aucun ne manque), `T(fr, en)` dans `app.js`. Les traces de `--log`
+  et les exceptions internes restent en français. Commentaires en français ; identifiants en anglais.
 - Ne pas réécrire les sources avec PowerShell 5.1 (`Get-Content`/`Set-Content`) : il lit l'UTF-8 sans BOM
   comme de l'ANSI et abîme les accents.
 - Toute nouvelle commande ou tout nouveau décodage du protocole : test dans `tests/` avec des payloads

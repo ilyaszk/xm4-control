@@ -7,8 +7,8 @@
 Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony.
 
 <p>
-  <img src="docs/flyout.png" alt="Popup au-dessus de l'horloge" height="300">
-  <img src="docs/main.png" alt="Fenêtre principale : mode actuel, casque en 3D, réglages rapides" height="300">
+  <img src="docs/flyout.fr.png" alt="Popup au-dessus de l'horloge" height="300">
+  <img src="docs/main.fr.png" alt="Fenêtre principale : mode actuel, casque en 3D, réglages rapides" height="300">
 </p>
 
 - **Fenêtre principale** : mode actuel et casque en 3D, réglages rapides, pages Son, Égaliseur, Casque et Application
@@ -22,6 +22,7 @@ Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony
   extinction automatique, pavé tactile, guide vocal, réduction du vent
 - Niveau de batterie dans l'icône de notification, alerte quand il passe sous 20 %, lancement au démarrage
   de Windows
+- **Français et anglais** : suit la langue d'affichage de Windows, ou se choisit dans la page Application
 - Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système), aux couleurs des modes de la
   fenêtre principale ; fenêtre principale en HTML/CSS affichée par WebView2 (thème sombre, rendu du casque)
 - Outil en ligne de commande `xm4` pour les scripts
@@ -45,13 +46,15 @@ visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de
 - **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
 - Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
 - `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
+- **Langue** : l'appli suit la langue d'affichage de Windows (français si Windows est en français, anglais sinon) ;
+  *Application > Langue* la change tout de suite.
 
-**Ligne de commande** (`xm4.exe`, aussi dans les Releases) :
+**Ligne de commande** (`xm4.exe`, aussi dans les Releases ; dans la langue d'affichage de Windows) :
 
 ```text
 xm4 status                 état du casque
 xm4 nc                     réduction de bruit
-xm4 ambient [1-20] [voix]  son ambiant
+xm4 ambient [1-20] [voix]  son ambiant (voix : focus sur la voix)
 xm4 wind | off             réduction du vent / désactivé
 xm4 eq BassBoost           préréglage d'égaliseur
 xm4 dsee|s2c|pause|autooff|touch|voice on|off
@@ -144,9 +147,13 @@ src/Xm4Control.Core   protocole (trames, commandes, décodage), Bluetooth Win32,
 src/Xm4Control.App    appli WinUI 3 (Windows App SDK) : popup, icône de notification (H.NotifyIcon)
 src/Xm4Control.App/Web  fenêtre principale en HTML/CSS/JS (WebView2), casque 3D avec three.js
 src/Xm4Control.Cli    outil xm4
-tests/                tests du protocole sur des trames capturées
+tests/                tests du protocole sur des trames capturées, vérification de la traduction de la page web
 tools/headset-render  scripts Blender : modèle 3D allégé (Web/headset.glb) et image de secours (Web/headset.png)
 ```
+
+Chaque texte visible existe en français et en anglais, côte à côte. En C# : `T("Réduction de bruit", "Noise cancelling")`
+(`Lang` dans `Xm4Control.Core`). Dans la page web, écrite en français : un attribut `data-en` pour le texte, et
+`data-en-aria-label` ou `data-en-alt` pour les attributs ; `WebPageTests` échoue s'il en manque un.
 
 Le modèle 3D et l'image se recalculent avec Blender (`winget install BlenderFoundation.Blender`), à partir du
 modèle glTF téléchargé depuis Sketchfab et décompressé dans `docs/3d/src/` (non versionné) :
@@ -169,16 +176,17 @@ dotnet test
 
 GitHub Actions (`.github/workflows/build.yml`) compile, teste et produit les deux exe à chaque push : ils se
 téléchargent depuis l'exécution (artefact `xm4-control`, gardé 30 jours). Pour publier une version, changer la
-version dans `Directory.Build.props`, commiter, puis pousser un tag du même numéro :
+version dans `Directory.Build.props`, commiter, puis pousser un tag annoté du même numéro, dont le message liste
+les nouveautés (en anglais, comme la page de la release) :
 
 ```powershell
-git tag v2.4.0
+git tag -a v2.4.0 -m "- First change" -m "- Second change"
 git push origin master v2.4.0
 ```
 
-L'action crée alors la release avec les deux exe. Ses notes listent les commits depuis la version précédente,
-suivis de la description de `.github/release-notes.md`. Si la release existe déjà (notes rédigées à la main),
-l'action y dépose seulement les exe.
+L'action crée alors la release avec les deux exe. Ses notes commencent par le message du tag (pour un tag léger,
+la liste des commits depuis la version précédente), suivi de la description de `.github/release-notes.md`. Si la
+release existe déjà (notes rédigées à la main), l'action y dépose seulement les exe.
 
 L'appli est non empaquetée (pas de MSIX), avec le runtime Windows App SDK embarqué, élaguée et compressée en un
 seul exe (environ 40 Mo, page web et modèle 3D compris) : ses fichiers sont extraits dans un dossier temporaire au

@@ -45,6 +45,8 @@ internal sealed record WebState(
     bool HotkeyEnabled,
     string HotkeyError,
     bool LowBatteryAlert,
+    IReadOnlyList<string> Languages,
+    int LanguageIndex,
     string Version,
     string? Page);
 
@@ -99,6 +101,8 @@ internal static class WebBridge
         vm.HotkeyEnabled,
         vm.HotkeyError,
         vm.LowBatteryAlert,
+        vm.LanguageLabels,
+        vm.LanguageIndex,
         vm.Version,
         page), WebJson.Default.WebState);
 
@@ -141,6 +145,7 @@ internal static class WebBridge
             case "startWithWindows": vm.StartWithWindows = value.GetBoolean(); break;
             case "hotkey": vm.HotkeyEnabled = value.GetBoolean(); break;
             case "lowBatteryAlert": vm.LowBatteryAlert = value.GetBoolean(); break;
+            case "language": vm.LanguageIndex = value.GetInt32(); break;
             default: return cmd;
         }
         return null;

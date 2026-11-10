@@ -11,6 +11,28 @@ let draggingBands = null;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+// --- Langue ---
+
+// L'appli passe la langue dans l'adresse (?lang=fr|en) ; dans un navigateur, celle du navigateur.
+const lang = new URLSearchParams(location.search).get('lang') || (navigator.language.startsWith('fr') ? 'fr' : 'en');
+const french = lang === 'fr';
+
+// Texte visible, écrit dans les deux langues côte à côte (comme Lang.T côté C#).
+const T = (fr, en) => (french ? fr : en);
+const percent = (n) => (french ? n + ' %' : n + '%');
+
+// La page est écrite en français : en anglais, chaque élément prend son texte de data-en et ses attributs de
+// data-en-<attribut> (data-en-aria-label, data-en-alt).
+if (!french) {
+  document.documentElement.lang = 'en';
+  for (const e of $$('*')) {
+    for (const a of [...e.attributes]) {
+      if (a.name === 'data-en') e.textContent = a.value;
+      else if (a.name.startsWith('data-en-')) e.setAttribute(a.name.slice('data-en-'.length), a.value);
+    }
+  }
+}
+
 function send(cmd, value) {
   if (host) host.postMessage(value === undefined ? { cmd } : { cmd, value });
   else if (preview) preview(cmd, value);
@@ -69,10 +91,26 @@ function paintDial(level, active) {
 }
 
 const MODES = {
-  nc: { title: 'Réduction de bruit', hint: 'Isolation maximale : le monde extérieur se tait.', tint: '#8ec5ff' },
-  ambient: { title: 'Son ambiant', hint: 'Vous entendez ce qui se passe autour de vous.', tint: '#f2c27b' },
-  wind: { title: 'Réduction du vent', hint: 'Coupe le souffle du vent, en extérieur.', tint: '#7fd8c8' },
-  off: { title: 'Désactivé', hint: 'Son naturel, sans traitement.', tint: '#a3acb8' },
+  nc: {
+    title: T('Réduction de bruit', 'Noise cancelling'),
+    hint: T('Isolation maximale : le monde extérieur se tait.', 'Maximum isolation: the outside world goes quiet.'),
+    tint: '#8ec5ff',
+  },
+  ambient: {
+    title: T('Son ambiant', 'Ambient sound'),
+    hint: T('Vous entendez ce qui se passe autour de vous.', "You hear what's going on around you."),
+    tint: '#f2c27b',
+  },
+  wind: {
+    title: T('Réduction du vent', 'Wind noise reduction'),
+    hint: T('Coupe le souffle du vent, en extérieur.', 'Cuts out wind noise outdoors.'),
+    tint: '#7fd8c8',
+  },
+  off: {
+    title: T('Désactivé', 'Off'),
+    hint: T('Son naturel, sans traitement.', 'Natural sound, no processing.'),
+    tint: '#a3acb8',
+  },
 };
 
 for (const r of $$('[data-range]')) {
@@ -127,11 +165,12 @@ function render(s) {
   // Batterie.
   const hasBattery = s.battery !== null;
   for (const el of $$('[data-show="battery"]')) el.hidden = !hasBattery;
+  const batteryText = hasBattery ? percent(s.battery) + (s.charging ? T(' · en charge', ' · charging') : '') : '—';
   if (hasBattery) {
     $('#battery-fill').style.width = s.battery + '%';
-    $('#battery-text').textContent = s.battery + ' %' + (s.charging ? ' · en charge' : '');
+    $('#battery-text').textContent = batteryText;
   }
-  $('#stat-battery').textContent = hasBattery ? s.battery + ' %' + (s.charging ? ' · en charge' : '') : '—';
+  $('#stat-battery').textContent = batteryText;
 
   for (const b of $$('[data-mode]')) {
     b.setAttribute('aria-checked', String(s.mode === b.dataset.mode));
@@ -140,7 +179,7 @@ function render(s) {
 
   const ambient = s.mode === 'ambient';
   const mode = MODES[s.mode];
-  $('#mode-title').textContent = mode ? mode.title : s.connected ? '—' : 'Casque déconnecté';
+  $('#mode-title').textContent = mode ? mode.title : s.connected ? '—' : T('Casque déconnecté', 'Headphones disconnected');
   $('#mode-hint').textContent = mode ? mode.hint : s.disconnectedHint;
   window.headsetTint = mode ? mode.tint : '#a3acb8';
   if (window.setHeadsetTint) window.setHeadsetTint(window.headsetTint);
@@ -149,7 +188,7 @@ function render(s) {
   $('#ambient-card').classList.toggle('disabled', !ambient);
   $('#ambient-down').disabled = !ambient || s.ambientLevel <= 1;
   $('#ambient-up').disabled = !ambient || s.ambientLevel >= 20;
-  $('#dial-state').textContent = ambient ? 'actif' : 'inactif';
+  $('#dial-state').textContent = ambient ? T('actif', 'active') : T('inactif', 'inactive');
 
   for (const r of $$('[data-range]')) {
     if (document.activeElement !== r) r.value = s[r.dataset.range];
@@ -172,16 +211,17 @@ function render(s) {
   for (const sel of $$('[data-select]')) {
     fillOptions(sel, s[sel.dataset.options]);
     sel.value = String(s[sel.dataset.select]);
-    sel.disabled = !s.speakToChatConfig;
+    // Les réglages de Speak-to-Chat ne se lisent que casque connecté ; la langue se choisit toujours.
+    sel.disabled = sel.closest('#s2c-config') !== null && !s.speakToChatConfig;
   }
   $('#s2c-config').hidden = s.speakToChat !== true;
 
   const opt = $('#optimizer-btn');
-  opt.textContent = s.optimizing ? 'Arrêter' : 'Lancer';
+  opt.textContent = s.optimizing ? T('Arrêter', 'Stop') : T('Lancer', 'Start');
   opt.disabled = !s.connected;
 
-  $('#mic-hint').textContent = s.mic === null ? 'Indisponible'
-    : s.mic ? 'Profil mains libres actif' : 'Stéréo haute qualité, micro coupé';
+  $('#mic-hint').textContent = s.mic === null ? T('Indisponible', 'Unavailable')
+    : s.mic ? T('Profil mains libres actif', 'Hands-free profile on') : T('Stéréo haute qualité, micro coupé', 'High-quality stereo, mic off');
   $('#home-preset').textContent = s.presets[s.presetIndex] || '—';
   $('#power-off').disabled = !s.connected;
 
@@ -351,18 +391,27 @@ if (host) {
 } else {
   // Aperçu hors de l'appli (navigateur) : état d'exemple, les commandes ne modifient que cet état local.
   const s = {
-    connected: true, deviceName: 'WH-1000XM4', statusText: 'Connecté · AAC', disconnectedHint: '', error: '',
+    connected: true, deviceName: 'WH-1000XM4', statusText: T('Connecté · AAC', 'Connected · AAC'), disconnectedHint: '', error: '',
     battery: 80, charging: false, codec: 'AAC', firmware: '—', mode: 'nc', ambientLevel: 12, focusOnVoice: false,
     optimizing: false, optimizerStatus: '', mic: true,
-    presets: ['Désactivé', 'Bright', 'Excited', 'Mellow', 'Relaxed', 'Vocal', 'Treble Boost', 'Bass Boost', 'Speech', 'Manuel', 'Personnalisé 1', 'Personnalisé 2'],
-    presetIndex: 7, bands: [6, 2, -1, 0, 1, 2], bandLabels: ['Clear Bass', '400', '1k', '2,5k', '6,3k', '16k'],
-    dsee: false, speakToChat: true, speakToChatConfig: true, sensitivities: ['Auto', 'Élevée', 'Basse'], sensitivityIndex: 0,
-    timeouts: ['Court', 'Normal', 'Long', 'Jamais'], timeoutIndex: 1, speakToChatVoiceFocus: false,
+    presets: [T('Désactivé', 'Off'), 'Bright', 'Excited', 'Mellow', 'Relaxed', 'Vocal', 'Treble Boost', 'Bass Boost', 'Speech',
+      T('Manuel', 'Manual'), T('Personnalisé 1', 'Custom 1'), T('Personnalisé 2', 'Custom 2')],
+    presetIndex: 7, bands: [6, 2, -1, 0, 1, 2], bandLabels: ['Clear Bass', '400', '1k', T('2,5k', '2.5k'), T('6,3k', '6.3k'), '16k'],
+    dsee: false, speakToChat: true, speakToChatConfig: true, sensitivityIndex: 0,
+    sensitivities: [T('Automatique', 'Auto'), T('Élevée', 'High'), T('Faible', 'Low')],
+    timeouts: [T('Court', 'Short'), 'Standard', 'Long', T('Jamais', 'Never')], timeoutIndex: 1, speakToChatVoiceFocus: false,
     pauseWhenTakenOff: true, autoPowerOff: true, touchSensor: true, voiceGuidance: false,
-    startWithWindows: true, hotkeyEnabled: true, hotkeyError: '', lowBatteryAlert: true, version: 'aperçu', page: null,
+    startWithWindows: true, hotkeyEnabled: true, hotkeyError: '', lowBatteryAlert: true,
+    languages: [T('Langue de Windows', 'Windows language'), 'Français', 'English'],
+    languageIndex: { fr: 1, en: 2 }[new URLSearchParams(location.search).get('lang')] || 0,
+    version: T('aperçu', 'preview'), page: null,
   };
   const keys = { ambientLevel: 'ambientLevel', preset: 'presetIndex', sensitivity: 'sensitivityIndex', timeout: 'timeoutIndex', hotkey: 'hotkeyEnabled' };
   preview = (cmd, value) => {
+    if (cmd === 'language') {
+      location.search = ['', '?lang=fr', '?lang=en'][value];
+      return;
+    }
     if (cmd === 'mode') s.mode = value;
     else if (cmd === 'bands') { s.bands = value; s.presetIndex = 9; }
     else if (cmd in s || cmd in keys) s[keys[cmd] || cmd] = value;

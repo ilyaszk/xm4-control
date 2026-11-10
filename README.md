@@ -8,8 +8,6 @@ Control your **Sony WH-1000XM4** headphones from Windows 11: noise cancelling, a
 level and every headset setting, right from the system tray, without the Sony mobile app. An unofficial desktop
 alternative to Sony Headphones Connect (now Sound Connect), which only exists on phones.
 
-> The app's interface is in French.
-
 <p>
   <img src="docs/flyout.png" alt="Tray flyout above the clock" height="300">
   <img src="docs/main.png" alt="Main window: current mode, 3D headset, quick settings" height="300">
@@ -20,12 +18,13 @@ alternative to Sony Headphones Connect (now Sound Connect), which only exists on
   microphone (use your PC or webcam microphone instead)
 - **Tray flyout above the clock**: current mode and battery, noise cancelling / ambient sound / wind / off,
   ambient sound level, Mic and Speak-to-Chat switches, quick access to the equalizer
-- **Main window**: current mode and 3D headset, quick settings, Sound, Equalizer, Headset and App pages
+- **Main window**: current mode and 3D headset, quick settings, Sound, Equalizer, Headphones and App pages
 - **Global shortcut `Ctrl + Alt + N`**: noise cancelling → ambient sound → off, from any app
 - **Equalizer**: Sony presets, Clear Bass and 5 bands you adjust with the mouse (drag or scroll wheel)
 - NC Optimizer, Speak-to-Chat (sensitivity, timeout), DSEE Extreme, pause when taken off, automatic power off,
   touch panel, voice guidance, wind noise reduction
-- Battery level in the tray icon, alert when it drops to 20 %, start with Windows
+- Battery level in the tray icon, alert when it drops to 20%, start with Windows
+- **English and French**: follows the Windows display language, or pick one in the App page
 - Native Windows 11 flyout in WinUI 3 (Acrylic, follows the system light/dark theme); main window in HTML/CSS
   rendered by WebView2 (dark theme, 3D headset)
 - `xm4` command-line tool for scripts
@@ -43,23 +42,25 @@ on. Windows 11 puts new icons in the hidden area (the `^` arrow): to keep this o
 
 ## Usage
 
-- **Click** the icon (a battery showing the headset's charge, red at 20 % and below, empty and dimmed when the
+- **Click** the icon (a battery showing the headphones' charge, red at 20% and below, empty and dimmed when the
   headphones aren't connected): quick flyout. **Double-click**: main window.
   **Right-click**: menu (modes, mic, settings, quit).
 - **Running the exe again** (Start menu, double-click) opens the main window of the app already running.
 - Closing the main window frees its memory; the app stays in the tray.
 - `Xm4Control.exe --log` writes the frames exchanged with the headphones to `%LOCALAPPDATA%\Xm4Control\trace.log`.
+- **Language**: the app follows the Windows display language (French if Windows is in French, English otherwise);
+  *App > Language* switches it right away.
 
-**Command line** (`xm4.exe`, also in the Releases):
+**Command line** (`xm4.exe`, also in the Releases; in the Windows display language):
 
 ```text
-xm4 status                 headset status
+xm4 status                 headphones status
 xm4 nc                     noise cancelling
-xm4 ambient [1-20] [voix]  ambient sound (level, voix = focus on voice)
+xm4 ambient [1-20] [voice] ambient sound (level, focus on voice)
 xm4 wind | off             wind noise reduction / off
 xm4 eq BassBoost           equalizer preset
 xm4 dsee|s2c|pause|autooff|touch|voice on|off
-xm4 mic off                stereo without the headset mic (mic on to undo)
+xm4 mic off                stereo without the headphones mic (mic on to undo)
 xm4 list                   paired Bluetooth devices and connection state
 xm4 raw 6602 -v            debug: raw payload, -v prints the frames
 ```
@@ -150,9 +151,13 @@ src/Xm4Control.Core   protocol (frames, commands, decoding), Win32 Bluetooth, RF
 src/Xm4Control.App    WinUI 3 app (Windows App SDK): flyout, tray icon (H.NotifyIcon)
 src/Xm4Control.App/Web  main window in HTML/CSS/JS (WebView2), 3D headset with three.js
 src/Xm4Control.Cli    xm4 tool
-tests/                protocol tests on captured frames
+tests/                protocol tests on captured frames, translation check of the web page
 tools/headset-render  Blender scripts: lightweight 3D model (Web/headset.glb) and fallback image (Web/headset.png)
 ```
+
+Every visible text exists in French and English, side by side. In C#: `T("Réduction de bruit", "Noise cancelling")`
+(`Lang` in `Xm4Control.Core`). In the web page, written in French: a `data-en` attribute for the text, and
+`data-en-aria-label` or `data-en-alt` for attributes; `WebPageTests` fails if one is missing.
 
 The 3D model and the image are rebuilt with Blender (`winget install BlenderFoundation.Blender`), from the glTF
 model downloaded from Sketchfab and unzipped into `docs/3d/src/` (not versioned):
@@ -175,16 +180,16 @@ dotnet test
 
 GitHub Actions (`.github/workflows/build.yml`) builds, tests and produces both exes on every push: download them
 from the run (artifact `xm4-control`, kept 30 days). To publish a version, change the version in
-`Directory.Build.props`, commit, then push a tag with the same number:
+`Directory.Build.props`, commit, then push an annotated tag with the same number, whose message lists what's new:
 
 ```powershell
-git tag v2.4.0
+git tag -a v2.4.0 -m "- First change" -m "- Second change"
 git push origin master v2.4.0
 ```
 
-The action then creates the release with both exes. Its notes list the commits since the previous version,
-followed by the description in `.github/release-notes.md`. If the release already exists (notes written by hand),
-the action only uploads the exes.
+The action then creates the release with both exes. Its notes start with the tag message (for a lightweight tag,
+the list of commits since the previous version), followed by the description in `.github/release-notes.md`. If the
+release already exists (notes written by hand), the action only uploads the exes.
 
 The app is unpackaged (no MSIX), with the Windows App SDK runtime bundled, trimmed and compressed into a single exe
 (about 40 MB, web page and 3D model included): its files are extracted to a temporary folder on first launch. To

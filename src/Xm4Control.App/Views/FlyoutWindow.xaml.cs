@@ -5,7 +5,9 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Graphics;
 using Windows.UI;
+using Xm4Control.Core;
 using Xm4Control.Core.Protocol;
+using static Xm4Control.Core.Lang;
 
 namespace Xm4Control.App.Views;
 
@@ -85,6 +87,9 @@ public sealed partial class FlyoutWindow : Window
         Hidden?.Invoke();
     }
 
+    /// <summary>Langue changée : réévalue toutes les liaisons, y compris les textes fixes (liés une seule fois).</summary>
+    internal void Retranslate() => Bindings.Update();
+
     /// <summary>Dimensionne la fenêtre sur son contenu et la place en bas à droite de l'écran principal.</summary>
     private void Place()
     {
@@ -128,19 +133,19 @@ public sealed partial class FlyoutWindow : Window
     }
 
     private string ModeTitle(bool connected, bool noiseCancelling, bool ambient, bool wind, bool off) =>
-        !connected ? "Déconnecté"
-        : noiseCancelling ? "Réduction de bruit"
-        : ambient ? "Son ambiant"
-        : wind ? "Réduction du vent"
-        : off ? "Désactivé"
+        !connected ? T("Déconnecté", "Disconnected")
+        : noiseCancelling ? Labels.Of(AmbientMode.NoiseCancelling)
+        : ambient ? Labels.Of(AmbientMode.Ambient)
+        : wind ? Labels.Of(AmbientMode.WindReduction)
+        : off ? Labels.Of(AmbientMode.Off)
         : "…";
 
     private string ModeHint(bool connected, bool noiseCancelling, bool ambient, bool wind, bool off) =>
         !connected ? ViewModel.DisconnectedHint
-        : noiseCancelling ? "Coupe les bruits autour de vous."
-        : ambient ? "Laisse entrer les sons extérieurs."
-        : wind ? "Coupe le souffle du vent, dehors."
-        : off ? "Son naturel, sans traitement."
+        : noiseCancelling ? T("Coupe les bruits autour de vous.", "Blocks out the noise around you.")
+        : ambient ? T("Laisse entrer les sons extérieurs.", "Lets outside sounds in.")
+        : wind ? T("Coupe le souffle du vent, dehors.", "Cuts out wind noise outdoors.")
+        : off ? T("Son naturel, sans traitement.", "Natural sound, no processing.")
         : "";
 
     private string DeviceCaps(string name) => name.ToUpperInvariant();
@@ -153,9 +158,28 @@ public sealed partial class FlyoutWindow : Window
 
     private string AmbientText(int level) => $"{level} / 20";
 
-    private string AmbientFoot(bool ambient) => ambient ? "Voix en avant" : "Réglable en mode Son ambiant";
+    private string AmbientFoot(bool ambient) => ambient ? FocusOnVoiceText : T("Réglable en mode Son ambiant", "Adjustable in Ambient sound mode");
 
-    private string MicHint(bool enabled) => enabled ? "Mains libres actif" : "Coupé : stéréo HD";
+    private string MicHint(bool enabled) => enabled ? T("Mains libres actif", "Hands-free on") : T("Coupé : stéréo HD", "Off: HD stereo");
+
+    // --- Textes fixes, liés une seule fois (relus par Retranslate) ---
+
+    private string HeadsetText => T("Casque Sony WH-1000XM4", "Sony WH-1000XM4 headphones");
+    private string NoiseCancellingText => Labels.Of(AmbientMode.NoiseCancelling);
+    private string AmbientSoundText => Labels.Of(AmbientMode.Ambient);
+    private string WindText => Labels.Of(AmbientMode.WindReduction);
+    private string OffText => Labels.Of(AmbientMode.Off);
+    private string NoiseTile => T("Bruit", "Noise");
+    private string AmbientTile => T("Ambiant", "Ambient");
+    private string WindTile => T("Vent", "Wind");
+    private string OffTile => T("Aucun", "Off");
+    private string AmbientLevelText => T("Niveau du son ambiant", "Ambient sound level");
+    private string FocusOnVoiceText => T("Voix en avant", "Focus on voice");
+    private string MicName => T("Micro du casque", "Headphones mic");
+    private string MicTile => T("Micro", "Mic");
+    private string SpeakToChatHint => T("Pause quand vous parlez", "Pauses when you talk");
+    private string EqualizerText => T("Égaliseur", "Equalizer");
+    private string OpenAppText => T("Ouvrir XM4 Control", "Open XM4 Control");
 
     // Petit interrupteur dessiné dans les bascules rapides.
     private Brush TrackBrush(bool on) => on

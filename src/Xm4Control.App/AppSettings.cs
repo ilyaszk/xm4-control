@@ -31,6 +31,9 @@ internal sealed class AppSettings
     /// <summary>Notification quand la batterie du casque passe sous 20 %.</summary>
     public bool LowBatteryAlert { get; set; } = true;
 
+    /// <summary>Langue de l'interface, "fr" ou "en" ; null : celle de Windows.</summary>
+    public string? Language { get; set; }
+
     public static AppSettings Load()
     {
         try

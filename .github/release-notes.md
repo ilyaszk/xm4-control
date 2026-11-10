@@ -1,82 +1,83 @@
-Contrôle du casque **Sony WH-1000XM4** depuis Windows 11, sans l'appli mobile Sony : modes de réduction de bruit, égaliseur, micro et tous les réglages du casque, depuis la zone de notification.
+Control your **Sony WH-1000XM4** headphones from Windows 11, without the Sony mobile app: noise cancelling modes, equalizer, mic and every headset setting, right from the system tray. In English and French.
 
 <p>
-  <img src="https://raw.githubusercontent.com/ilyaszk/xm4-control/{{tag}}/docs/flyout.png" alt="Popup au-dessus de l'horloge" height="300">
-  <img src="https://raw.githubusercontent.com/ilyaszk/xm4-control/{{tag}}/docs/main.png" alt="Fenêtre principale" height="300">
+  <img src="https://raw.githubusercontent.com/ilyaszk/xm4-control/{{tag}}/docs/flyout.png" alt="Tray flyout above the clock" height="300">
+  <img src="https://raw.githubusercontent.com/ilyaszk/xm4-control/{{tag}}/docs/main.png" alt="Main window" height="300">
 </p>
 
-## Fonctionnalités
+## Features
 
-- **Icône de notification** : une pile façon macOS avec le niveau de batterie du casque, rouge à 20 % et moins, vide et atténuée quand le casque n'est pas connecté. Blanche ou noire selon le thème de la barre des tâches, nette à toutes les échelles d'affichage.
-- **Popup au-dessus de l'horloge** (un clic sur l'icône) : mode actuel et batterie, réduction de bruit / son ambiant / vent / désactivé, niveau du son ambiant, bascules Micro et Speak-to-Chat, accès direct à l'égaliseur.
-- **Fenêtre principale** (double-clic sur l'icône) : casque en 3D, réglages rapides, pages Son, Égaliseur, Casque et Application.
-- **Égaliseur** : préréglages Sony, courbe Clear Bass et 5 bandes à régler à la souris (glisser ou molette).
-- **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité. Fini le son « téléphone » quand Teams ou Discord ouvre le micro.
-- **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli.
-- **Réglages du casque** : optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait, extinction automatique, pavé tactile, guide vocal.
-- **Alerte** quand la batterie passe sous 20 %, **lancement au démarrage** de Windows.
-- **Ligne de commande** `xm4` pour les scripts.
+- **Tray icon**: a macOS-style battery showing the headphones' charge, red at 20% and below, empty and dimmed when the headphones aren't connected. White or black to match the taskbar theme, sharp at every display scale.
+- **Flyout above the clock** (click the icon): current mode and battery, noise cancelling / ambient sound / wind / off, ambient sound level, Mic and Speak-to-Chat switches, quick access to the equalizer.
+- **Main window** (double-click the icon): 3D headphones, quick settings, Sound, Equalizer, Headphones and App pages.
+- **Equalizer**: Sony presets, Clear Bass and 5 bands you adjust with the mouse (drag or scroll wheel).
+- **Stereo during calls**: the Mic switch turns off the Windows Hands-Free profile, so the headphones stay in high-quality stereo. No more mono "phone call" sound when Teams or Discord opens the microphone.
+- **Global shortcut `Ctrl + Alt + N`**: noise cancelling → ambient sound → off, from any app.
+- **Headphone settings**: NC Optimizer, Speak-to-Chat (sensitivity, timeout), DSEE Extreme, pause when taken off, automatic power off, touch panel, voice guidance.
+- **Low battery alert** at 20%, **start with Windows**.
+- **English and French**: follows the Windows display language, or pick one in the App page.
+- **Command line** `xm4` for scripts.
 
 ## Installation
 
-1. Appairer le casque dans *Paramètres > Bluetooth et appareils*.
-2. Télécharger `Xm4Control.exe` ci-dessous, le ranger dans un dossier à soi (par exemple `%LOCALAPPDATA%\Programs\XM4 Control`) et le lancer. Rien d'autre à installer : l'exe embarque .NET, et la fenêtre principale utilise WebView2, déjà présent dans Windows 11.
-3. Au premier lancement, Windows SmartScreen peut afficher « Windows a protégé votre ordinateur », car l'exe n'est pas signé : *Informations complémentaires > Exécuter quand même*.
-4. Windows 11 range les nouvelles icônes dans la zone masquée (flèche `^`). Pour garder la pile visible : *Paramètres > Personnalisation > Barre des tâches > Autres icônes de la barre d'état système*.
+1. Pair the headphones in *Settings > Bluetooth & devices*.
+2. Download `Xm4Control.exe` below, put it in a folder of your own (for example `%LOCALAPPDATA%\Programs\XM4 Control`) and run it. Nothing else to install: the exe bundles .NET, and the main window uses WebView2, which ships with Windows 11.
+3. On first launch, Windows SmartScreen may show "Windows protected your PC" because the exe isn't signed: *More info > Run anyway*.
+4. Windows 11 puts new icons in the hidden area (the `^` arrow). To keep the battery visible: *Settings > Personalization > Taskbar > Other system tray icons*.
 
-L'appli se connecte toute seule au casque dès que Windows le voit connecté. Le lancement au démarrage s'active dans la page Application de la fenêtre principale.
+The app connects to the headphones on its own as soon as Windows sees them connected. Start with Windows is turned on in the App page of the main window.
 
-## Utilisation
+## Usage
 
-| Action | Effet |
+| Action | Result |
 |---|---|
-| Clic sur l'icône | Popup rapide |
-| Double-clic sur l'icône | Fenêtre principale |
-| Clic droit sur l'icône | Menu : modes, micro, réglages, quitter |
-| `Ctrl + Alt + N` | Mode suivant |
-| Relancer l'exe | Ouvre la fenêtre principale de l'appli déjà lancée |
+| Click the icon | Quick flyout |
+| Double-click the icon | Main window |
+| Right-click the icon | Menu: modes, mic, settings, quit |
+| `Ctrl + Alt + N` | Next mode |
+| Run the exe again | Opens the main window of the app already running |
 
-Fermer la fenêtre principale libère sa mémoire : l'appli reste dans la zone de notification.
+Closing the main window frees its memory: the app stays in the system tray.
 
-## Ligne de commande
+## Command line
 
-`xm4.exe` est indépendant de l'appli :
+`xm4.exe` works without the app, in the Windows display language:
 
 ```text
-xm4 status                 état du casque
-xm4 nc                     réduction de bruit
-xm4 ambient [1-20] [voix]  son ambiant
-xm4 wind | off             réduction du vent / désactivé
-xm4 eq BassBoost           préréglage d'égaliseur
+xm4 status                 headphones status
+xm4 nc                     noise cancelling
+xm4 ambient [1-20] [voice] ambient sound (level, focus on voice)
+xm4 wind | off             wind noise reduction / off
+xm4 eq BassBoost           equalizer preset
 xm4 dsee|s2c|pause|autooff|touch|voice on|off
-xm4 mic off                stéréo sans micro (mic on pour revenir)
-xm4 list                   appareils Bluetooth appairés et état de connexion
+xm4 mic off                stereo without the headphones mic (mic on to undo)
+xm4 list                   paired Bluetooth devices and connection state
 ```
 
-Le casque n'accepte qu'une connexion de contrôle à la fois : quand l'appli tourne, la ligne de commande ne peut pas s'y connecter, sauf `xm4 mic` et `xm4 list` qui passent par Windows.
+The headphones accept only one control connection at a time: while the app is running, the command line can't connect to them, except `xm4 mic` and `xm4 list`, which go through Windows.
 
-## Bon à savoir
+## Good to know
 
-- **Micro coupé, le casque ne se reconnecte plus tout seul au PC** : il se reconnecte par le profil « mains libres », que l'option coupe. Le reconnecter depuis les paramètres rapides (*Bluetooth > WH-1000XM4*) ou *Paramètres > Bluetooth et appareils*.
-- **Le casque ne s'utilise pas pendant la charge** : il se déconnecte du PC, et l'icône affiche la pile vide.
-- Testé avec un WH-1000XM4 en firmware 2.9.0. L'appli ne cherche que ce modèle : le WH-1000XM5 et les autres casques Sony ne sont pas pris en charge.
-- En cas de souci, `Xm4Control.exe --log` écrit les échanges avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
+- **With the mic off, the headphones no longer reconnect to the PC on their own**: they reconnect through the Hands-Free profile, which the option turns off. Reconnect them from Quick Settings (*Bluetooth > WH-1000XM4*) or *Settings > Bluetooth & devices*.
+- **The headphones can't be used while charging**: they disconnect from the PC, and the icon shows an empty battery.
+- Tested with a WH-1000XM4 on firmware 2.9.0. The app only looks for this model: the WH-1000XM5 and other Sony headphones aren't supported.
+- If something goes wrong, `Xm4Control.exe --log` writes the exchanges with the headphones to `%LOCALAPPDATA%\Xm4Control\trace.log`.
 
-## Mise à jour
+## Updating
 
-Quitter l'appli (clic droit sur l'icône > *Quitter*), remplacer `Xm4Control.exe` par la nouvelle version et le relancer. Les réglages sont conservés.
+Quit the app (right-click the icon > *Quit*), replace `Xm4Control.exe` with the new version and run it again. Your settings are kept.
 
-## Désinstallation
+## Uninstalling
 
-1. Si le micro est coupé, le réactiver d'abord (popup, bascule Micro) : sinon le profil « mains libres » reste désactivé dans Windows.
-2. Désactiver le lancement au démarrage (page Application), puis quitter l'appli.
-3. Supprimer l'exe, ainsi que les dossiers `%APPDATA%\Xm4Control` (réglages) et `%LOCALAPPDATA%\Xm4Control` (données de la fenêtre principale).
+1. If the mic is off, turn it back on first (flyout, Mic switch): otherwise the Hands-Free profile stays disabled in Windows.
+2. Turn off Start with Windows (App page), then quit the app.
+3. Delete the exe, and the `%APPDATA%\Xm4Control` (settings) and `%LOCALAPPDATA%\Xm4Control` (main window data) folders.
 
-## Fichiers
+## Files
 
-| Fichier | Contenu |
+| File | Contents |
 |---|---|
-| `Xm4Control.exe` | L'application (environ 40 Mo, autonome) |
-| `xm4.exe` | La ligne de commande (environ 38 Mo, autonome) |
+| `Xm4Control.exe` | The app (about 40 MB, self-contained) |
+| `xm4.exe` | The command line (about 38 MB, self-contained) |
 
-Windows 11, 64 bits. Projet indépendant sous licence MIT, non affilié à Sony.
+Windows 11, 64-bit. Independent project under the MIT license, not affiliated with Sony. [Version française du README](https://github.com/ilyaszk/xm4-control/blob/{{tag}}/README.fr.md).

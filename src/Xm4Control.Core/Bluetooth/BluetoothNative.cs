@@ -93,7 +93,7 @@ internal static class BluetoothNative
     {
         var parameters = new FindRadioParams { Size = (uint)Marshal.SizeOf<FindRadioParams>() };
         var find = BluetoothFindFirstRadio(ref parameters, out var radio);
-        if (find == IntPtr.Zero) throw new InvalidOperationException("Aucun adaptateur Bluetooth trouvé.");
+        if (find == IntPtr.Zero) throw new InvalidOperationException(Lang.T("Aucun adaptateur Bluetooth trouvé.", "No Bluetooth adapter found."));
         BluetoothFindRadioClose(find);
         return new SafeRadioHandle(radio);
     }

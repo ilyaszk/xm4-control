@@ -9,6 +9,7 @@ using Windows.UI.ViewManagement;
 using Xm4Control.App.Views;
 using Xm4Control.Core;
 using Xm4Control.Core.Protocol;
+using static Xm4Control.Core.Lang;
 
 namespace Xm4Control.App;
 
@@ -57,13 +58,15 @@ public partial class App : Application
         // --log : trace des trames échangées avec le casque, pour le débogage.
         _log = _args.Contains("--log") ? OpenLog() : null;
         var settings = AppSettings.Load();
+        Lang.Set(settings.Language);
         _headset = new HeadsetController(settings, _log);
         ViewModel = new MainViewModel(_headset, settings);
         ViewModel.PropertyChanged += (_, _) => UpdateTray();
         ViewModel.HotkeySettingChanged += ApplyHotkeySetting;
+        ViewModel.LanguageChanged += () => _flyout?.Retranslate();
         ViewModel.LowBattery += level => _tray?.ShowNotification(
-            title: "Batterie du casque faible",
-            message: $"{ViewModel.DeviceName} : {level} % restants.",
+            title: T("Batterie du casque faible", "Headphones battery low"),
+            message: T($"{ViewModel.DeviceName} : {Percent(level)} restants.", $"{ViewModel.DeviceName}: {Percent(level)} left."),
             icon: NotificationIcon.Warning);
 
         Ui.FollowSystemThemeInMenus();
@@ -166,7 +169,9 @@ public partial class App : Application
         if (_hotkey is null) return;
         if (ViewModel.HotkeyEnabled)
         {
-            ViewModel.HotkeyError = _hotkey.Register() ? "" : $"{GlobalHotkey.Label} est déjà utilisé par une autre application.";
+            ViewModel.HotkeyError = _hotkey.Register() ? "" : T(
+                $"{GlobalHotkey.Label} est déjà utilisé par une autre application.",
+                $"{GlobalHotkey.Label} is already used by another app.");
         }
         else
         {
@@ -182,12 +187,14 @@ public partial class App : Application
         return TextWriter.Synchronized(new StreamWriter(path, append: false) { AutoFlush = true });
     }
 
-    /// <summary>Menu du clic droit sur l'icône, reconstruit à partir de l'état à chaque changement.</summary>
+    /// <summary>Menu du clic droit sur l'icône, mis à jour (état et textes) à chaque changement.</summary>
     private sealed class TrayMenu
     {
         private readonly MenuFlyoutItem _header = new() { IsEnabled = false };
         private readonly Dictionary<AmbientMode, ToggleMenuFlyoutItem> _modes = [];
-        private readonly ToggleMenuFlyoutItem _mic = new() { Text = "Micro du casque" };
+        private readonly ToggleMenuFlyoutItem _mic = new();
+        private readonly MenuFlyoutItem _settings = new();
+        private readonly MenuFlyoutItem _quit = new();
 
         public TrayMenu(App app)
         {
@@ -195,7 +202,7 @@ public partial class App : Application
             Flyout.Items.Add(new MenuFlyoutSeparator());
             foreach (var mode in Labels.ModeOrder)
             {
-                var item = new ToggleMenuFlyoutItem { Text = Labels.Of(mode), Command = new ActionCommand(() => app.ViewModel.SetMode(mode)) };
+                var item = new ToggleMenuFlyoutItem { Command = new ActionCommand(() => app.ViewModel.SetMode(mode)) };
                 _modes[mode] = item;
                 Flyout.Items.Add(item);
             }
@@ -203,8 +210,10 @@ public partial class App : Application
             _mic.Command = new ActionCommand(() => app.ViewModel.MicEnabled = !app.ViewModel.MicEnabled);
             Flyout.Items.Add(_mic);
             Flyout.Items.Add(new MenuFlyoutSeparator());
-            Flyout.Items.Add(new MenuFlyoutItem { Text = "Réglages…", Command = new ActionCommand(() => app.ShowSettings()) });
-            Flyout.Items.Add(new MenuFlyoutItem { Text = "Quitter", Command = new ActionCommand(app.Quit) });
+            _settings.Command = new ActionCommand(() => app.ShowSettings());
+            Flyout.Items.Add(_settings);
+            _quit.Command = new ActionCommand(app.Quit);
+            Flyout.Items.Add(_quit);
         }
 
         public MenuFlyout Flyout { get; } = new();
@@ -214,11 +223,15 @@ public partial class App : Application
             _header.Text = vm.Summary;
             foreach (var (mode, item) in _modes)
             {
+                item.Text = Labels.Of(mode);
                 item.IsChecked = vm.Mode == mode;
                 item.IsEnabled = vm.IsConnected;
             }
+            _mic.Text = T("Micro du casque", "Headphones mic");
             _mic.IsChecked = vm.MicEnabled;
             _mic.IsEnabled = vm.MicAvailable;
+            _settings.Text = T("Réglages…", "Settings…");
+            _quit.Text = T("Quitter", "Quit");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Xm4Control.Core;
 using Xm4Control.Core.Bluetooth;
 using Xm4Control.Core.Protocol;
+using static Xm4Control.Core.Lang;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -21,11 +22,13 @@ try
         return 0;
     }
 
-    var device = PairedDevices.FindXm4() ?? throw new InvalidOperationException("Aucun WH-1000XM4 appairé.");
+    var device = PairedDevices.FindXm4()
+        ?? throw new InvalidOperationException(T("Aucun WH-1000XM4 appairé.", "No WH-1000XM4 paired."));
 
     if (args[0] == "mic") return Mic(device, args.ElementAtOrDefault(1));
 
-    if (!device.Connected) throw new InvalidOperationException($"{device.Name} est appairé mais pas connecté.");
+    if (!device.Connected)
+        throw new InvalidOperationException(T($"{device.Name} est appairé mais pas connecté.", $"{device.Name} is paired but not connected."));
 
     using var client = new Xm4Client(device);
     if (verbose) client.Trace += line => Console.WriteLine($"  {line}");
@@ -34,8 +37,8 @@ try
 
     var on = args.ElementAtOrDefault(1) switch
     {
-        "on" or "1" or "oui" => true,
-        "off" or "0" or "non" => false,
+        "on" or "1" or "oui" or "yes" => true,
+        "off" or "0" or "non" or "no" => false,
         _ => (bool?)null,
     };
 
@@ -54,11 +57,15 @@ try
             break;
         case "ambient":
             var level = int.TryParse(args.ElementAtOrDefault(1), out var l) ? l : CurrentLevel(client.State);
-            await client.SetAmbientAsync(new AmbientSettings(AmbientMode.Ambient, level, args.Contains("voix")));
+            var focusOnVoice = args.Skip(1).Any(a => a is "voix" or "voice");
+            await client.SetAmbientAsync(new AmbientSettings(AmbientMode.Ambient, level, focusOnVoice));
             break;
         case "eq":
             if (!Enum.TryParse<EqPreset>(args.ElementAtOrDefault(1), true, out var preset))
-                throw new ArgumentException($"Préréglage inconnu. Valeurs : {string.Join(", ", Enum.GetNames<EqPreset>())}");
+            {
+                var names = string.Join(", ", Enum.GetNames<EqPreset>());
+                throw new ArgumentException(T($"Préréglage inconnu. Valeurs : {names}", $"Unknown preset. Values: {names}"));
+            }
             await client.SetEqualizerPresetAsync(preset);
             break;
         case "dsee":
@@ -86,7 +93,7 @@ try
             break;
         case "poweroff":
             await client.PowerOffAsync();
-            Console.WriteLine("Casque éteint.");
+            Console.WriteLine(T("Casque éteint.", "Headphones turned off."));
             return 0;
         default:
             PrintUsage();
@@ -100,7 +107,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.Error.WriteLine($"Erreur : {ex.Message}");
+    Console.Error.WriteLine(T($"Erreur : {ex.Message}", $"Error: {ex.Message}"));
     if (verbose) Console.Error.WriteLine(ex);
     return 1;
 }
@@ -115,45 +122,60 @@ static int Mic(PairedDevice device, string? action)
         }
         catch (UnauthorizedAccessException ex)
         {
-            Console.Error.WriteLine($"{ex.Message} Relance la commande dans un terminal administrateur.");
+            Console.Error.WriteLine(T(
+                $"{ex.Message} Relance la commande dans un terminal administrateur.",
+                $"{ex.Message} Run the command again in an administrator terminal."));
             return 2;
         }
     }
-    Console.WriteLine($"Micro (profil mains libres) : {(HandsFreeProfile.IsEnabled(device.Address) ? "activé" : "désactivé")}");
+    var enabled = HandsFreeProfile.IsEnabled(device.Address);
+    Console.WriteLine(T(
+        $"Micro (profil mains libres) : {(enabled ? "activé" : "désactivé")}",
+        $"Mic (hands-free profile): {(enabled ? "on" : "off")}"));
     return 0;
 }
 
 static int CurrentLevel(Xm4State state) =>
     state.Ambient is { Level: > 0 } a ? a.Level : 10;
 
-static bool Require(bool? on) => on ?? throw new ArgumentException("Préciser on ou off.");
+static bool Require(bool? on) => on ?? throw new ArgumentException(T("Préciser on ou off.", "Specify on or off."));
 
 static void PrintState(PairedDevice device, Xm4State s)
 {
-    static string YesNo(bool? b) => b switch { true => "oui", false => "non", null => "?" };
+    static string YesNo(bool? b) => b switch { true => T("oui", "yes"), false => T("non", "no"), null => "?" };
+
+    // Valeurs alignées en colonne, quelle que soit la longueur des libellés dans chaque langue.
+    static void Row(string label, string value) => Console.WriteLine($"  {(label + T(" :", ":")).PadRight(22)}{value}");
 
     Console.WriteLine($"{device.Name} ({device.AddressText})");
-    Console.WriteLine($"  Firmware       : {s.Firmware ?? "?"}");
-    Console.WriteLine($"  Batterie       : {(s.Battery is { } b ? $"{b} %" : "?")}{(s.Charging ? " (en charge)" : "")}");
-    Console.WriteLine($"  Codec          : {s.Codec ?? "?"}");
+    Row("Firmware", s.Firmware ?? "?");
+    Row(T("Batterie", "Battery"), (s.Battery is { } b ? Percent(b) : "?") + (s.Charging ? T(" (en charge)", " (charging)") : ""));
+    Row("Codec", s.Codec ?? "?");
     if (s.Ambient is { } a)
     {
-        var detail = a.Mode == AmbientMode.Ambient ? $" (niveau {a.Level}{(a.FocusOnVoice ? ", voix" : "")})" : "";
-        Console.WriteLine($"  Son ambiant    : {Labels.Of(a.Mode)}{detail}");
+        var voice = a.FocusOnVoice ? T(", voix", ", voice") : "";
+        var detail = a.Mode == AmbientMode.Ambient ? T($" (niveau {a.Level}{voice})", $" (level {a.Level}{voice})") : "";
+        Row(T("Son ambiant", "Ambient sound"), Labels.Of(a.Mode) + detail);
     }
     if (s.EqPreset is { } eq)
-        Console.WriteLine($"  Égaliseur      : {Labels.Of(eq)}{(s.EqBands is { } bands ? $" [{string.Join(" ", bands)}]" : "")}");
-    Console.WriteLine($"  DSEE Extreme   : {YesNo(s.Dsee)}");
-    Console.WriteLine($"  Speak-to-Chat  : {YesNo(s.SpeakToChat)}");
+        Row(T("Égaliseur", "Equalizer"), Labels.Of(eq) + (s.EqBands is { } bands ? $" [{string.Join(" ", bands)}]" : ""));
+    Row("DSEE Extreme", YesNo(s.Dsee));
+    Row("Speak-to-Chat", YesNo(s.SpeakToChat));
     if (s.SpeakToChatConfig is { } c)
-        Console.WriteLine($"    sensibilité {Labels.Of(c.Sensitivity).ToLowerInvariant()}, fin {Labels.Of(c.Timeout).ToLowerInvariant()}{(c.VoiceFocus ? ", focus voix" : "")}");
-    Console.WriteLine($"  Pause au retrait : {YesNo(s.PauseWhenTakenOff)}");
-    Console.WriteLine($"  Extinction auto : {YesNo(s.AutoPowerOff)}");
-    Console.WriteLine($"  Pavé tactile   : {YesNo(s.TouchSensor)}");
-    Console.WriteLine($"  Guide vocal    : {YesNo(s.VoiceGuidance)}");
+    {
+        var sensitivity = Labels.Of(c.Sensitivity).ToLowerInvariant();
+        var timeout = Labels.Of(c.Timeout).ToLowerInvariant();
+        Console.WriteLine(T(
+            $"    sensibilité {sensitivity}, fin {timeout}{(c.VoiceFocus ? ", focus voix" : "")}",
+            $"    sensitivity {sensitivity}, timeout {timeout}{(c.VoiceFocus ? ", voice focus" : "")}"));
+    }
+    Row(T("Pause au retrait", "Pause when taken off"), YesNo(s.PauseWhenTakenOff));
+    Row(T("Extinction auto", "Auto power off"), YesNo(s.AutoPowerOff));
+    Row(T("Pavé tactile", "Touch panel"), YesNo(s.TouchSensor));
+    Row(T("Guide vocal", "Voice guidance"), YesNo(s.VoiceGuidance));
 }
 
-static void PrintUsage() => Console.WriteLine("""
+static void PrintUsage() => Console.WriteLine(T("""
     xm4 - contrôle du Sony WH-1000XM4
 
       xm4 status                 état du casque
@@ -173,4 +195,24 @@ static void PrintUsage() => Console.WriteLine("""
       xm4 raw|raw2 <hex>         debug : envoie un payload brut (Command1 / Command2)
 
       -v                         affiche les trames échangées
-    """);
+    """, """
+    xm4 - Sony WH-1000XM4 control
+
+      xm4 status                 headphones status
+      xm4 nc                     noise cancelling
+      xm4 ambient [1-20] [voice] ambient sound (level, focus on voice)
+      xm4 wind                   wind noise reduction
+      xm4 off                    neither noise cancelling nor ambient sound
+      xm4 eq <preset>            Off, Bright, Excited, Mellow, Relaxed, Vocal,
+                                 TrebleBoost, BassBoost, Speech, Manual, Custom1, Custom2
+      xm4 dsee|s2c|pause|autooff|touch|voice on|off
+                                 DSEE Extreme, Speak-to-Chat, pause when taken off,
+                                 power off when not worn,
+                                 touch panel, voice guidance
+      xm4 mic [on|off]           Windows hands-free profile (off = stereo without mic)
+      xm4 poweroff               turns the headphones off
+      xm4 list                   paired Bluetooth devices
+      xm4 raw|raw2 <hex>         debug: sends a raw payload (Command1 / Command2)
+
+      -v                         prints the exchanged frames
+    """));
