@@ -152,8 +152,12 @@
                                 <StaticResource x:Key="ToggleButtonForegroundCheckedPressed" ResourceKey="ModeInk" />
                             </ToggleButton.Resources>
                             <StackPanel Spacing="5">
-                                <!-- Pas de pictogramme "vent" dans Segoe Fluent Icons : ≋ de Segoe UI Symbol. -->
-                                <FontIcon FontFamily="Segoe UI Symbol" FontSize="20" Glyph="&#x224B;" />
+                                <!--
+                                    Pas de pictogramme "vent" dans Segoe Fluent Icons : ≋ de Segoe UI Symbol. Sa ligne est
+                                    plus haute : les marges négatives lui rendent la hauteur des autres pictogrammes (libellés
+                                    alignés) et le remontent au niveau de leur centre.
+                                -->
+                                <FontIcon Margin="0,-6,0,-2" FontFamily="Segoe UI Symbol" FontSize="20" Glyph="&#x224B;" />
                                 <TextBlock FontSize="11.5" FontWeight="SemiBold" Text="{x:Bind WindTile}" TextAlignment="Center" />
                             </StackPanel>
                         </ToggleButton>
