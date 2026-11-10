@@ -1,7 +1,8 @@
 # xm4-control
 
 Appli Windows (WinUI 3, .NET 10) + CLI `xm4` pour piloter un Sony WH-1000XM4 en Bluetooth. Voir le README
-pour le protocole et la publication d'une version.
+pour le protocole et la publication d'une version. `README.md` est en anglais (lu par les gens qui cherchent
+l'appli), `README.fr.md` en est la version française : toujours modifier les deux ensemble.
 
 ## Commandes
 
@@ -53,5 +54,5 @@ pour le protocole et la publication d'une version.
 - Ne pas réécrire les sources avec PowerShell 5.1 (`Get-Content`/`Set-Content`) : il lit l'UTF-8 sans BOM
   comme de l'ANSI et abîme les accents.
 - Toute nouvelle commande ou tout nouveau décodage du protocole : test dans `tests/` avec des payloads
-  réellement capturés (`xm4 raw <hex> -v`), et mise à jour du tableau du README.
+  réellement capturés (`xm4 raw <hex> -v`), et mise à jour du tableau des deux README.
 - Ne pas couper le profil mains libres (`xm4 mic off`) sans prévenir : ça coupe le micro du casque en cours d'appel.

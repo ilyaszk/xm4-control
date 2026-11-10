@@ -1,153 +1,161 @@
-<p align="center"><img src="docs/logo.png" alt="Logo XM4 Control" width="128"></p>
+<p align="center"><img src="docs/logo.png" alt="XM4 Control logo" width="128"></p>
 
 # XM4 Control
 
-Contrôle du casque **Sony WH-1000XM4** depuis Windows, sans l'appli mobile Sony.
+**English** · [Français](README.fr.md)
+
+Control your **Sony WH-1000XM4** headphones from Windows 11: noise cancelling, ambient sound, equalizer, battery
+level and every headset setting, right from the system tray, without the Sony mobile app. An unofficial desktop
+alternative to Sony Headphones Connect (now Sound Connect), which only exists on phones.
+
+> The app's interface is in French.
 
 <p>
-  <img src="docs/flyout.png" alt="Popup au-dessus de l'horloge" height="300">
-  <img src="docs/main.png" alt="Fenêtre principale : mode actuel, casque en 3D, réglages rapides" height="300">
+  <img src="docs/flyout.png" alt="Tray flyout above the clock" height="300">
+  <img src="docs/main.png" alt="Main window: current mode, 3D headset, quick settings" height="300">
 </p>
 
-- **Fenêtre principale** : mode actuel et casque en 3D, réglages rapides, pages Son, Égaliseur, Casque et Application
-- **Popup au-dessus de l'horloge** : mode actuel et batterie, réduction de bruit / son ambiant / vent / désactivé,
-  niveau du son ambiant, bascules Micro et Speak-to-Chat, accès direct à l'égaliseur
-- **Micro on/off** : coupe le profil « mains libres » de Windows pour que le casque reste en stéréo haute qualité
-  (plus de bascule en son « téléphone » quand Teams ou Discord ouvre le micro)
-- **Raccourci global `Ctrl + Alt + N`** : réduction de bruit → son ambiant → désactivé, depuis n'importe quelle appli
-- **Égaliseur** : préréglages Sony, courbe Clear Bass + 5 bandes à régler à la souris (glisser ou molette)
-- Optimiseur de réduction de bruit, Speak-to-Chat (sensibilité, délai), DSEE Extreme, pause au retrait,
-  extinction automatique, pavé tactile, guide vocal, réduction du vent
-- Niveau de batterie dans l'icône de notification, alerte quand il passe sous 20 %, lancement au démarrage
-  de Windows
-- Popup WinUI 3, celui de Windows 11 (Acrylic, thème clair/sombre du système), aux couleurs des modes de la
-  fenêtre principale ; fenêtre principale en HTML/CSS affichée par WebView2 (thème sombre, rendu du casque)
-- Outil en ligne de commande `xm4` pour les scripts
+- **Stereo during calls**: the Mic switch turns off the Windows Hands-Free profile, so the headphones stay in
+  high-quality stereo instead of dropping to mono "phone call" sound when Teams, Discord or Zoom opens the
+  microphone (use your PC or webcam microphone instead)
+- **Tray flyout above the clock**: current mode and battery, noise cancelling / ambient sound / wind / off,
+  ambient sound level, Mic and Speak-to-Chat switches, quick access to the equalizer
+- **Main window**: current mode and 3D headset, quick settings, Sound, Equalizer, Headset and App pages
+- **Global shortcut `Ctrl + Alt + N`**: noise cancelling → ambient sound → off, from any app
+- **Equalizer**: Sony presets, Clear Bass and 5 bands you adjust with the mouse (drag or scroll wheel)
+- NC Optimizer, Speak-to-Chat (sensitivity, timeout), DSEE Extreme, pause when taken off, automatic power off,
+  touch panel, voice guidance, wind noise reduction
+- Battery level in the tray icon, alert when it drops to 20 %, start with Windows
+- Native Windows 11 flyout in WinUI 3 (Acrylic, follows the system light/dark theme); main window in HTML/CSS
+  rendered by WebView2 (dark theme, 3D headset)
+- `xm4` command-line tool for scripts
 
 ## Installation
 
-Télécharger `Xm4Control.exe` dans les [Releases](https://github.com/ilyaszk/xm4-control/releases) et le lancer.
-Rien d'autre à installer : l'exe embarque .NET, et la fenêtre principale utilise WebView2, déjà présent dans
-Windows 11. Au premier lancement, Windows SmartScreen peut afficher
-« Windows a protégé votre ordinateur » (l'exe n'est pas signé) : *Informations complémentaires > Exécuter quand même*.
+Download `Xm4Control.exe` from the [Releases](https://github.com/ilyaszk/xm4-control/releases) and run it.
+Nothing else to install: the exe bundles .NET, and the main window uses WebView2, which ships with Windows 11.
+On first launch, Windows SmartScreen may show "Windows protected your PC" (the exe isn't signed):
+*More info > Run anyway*.
 
-Le casque doit être appairé dans *Paramètres > Bluetooth et appareils* ; l'appli s'y connecte toute seule dès
-qu'il est allumé. Windows 11 range les nouvelles icônes dans la zone masquée (flèche `^`) : pour garder celle-ci
-visible, *Paramètres > Personnalisation > Barre des tâches > Autres icônes de la barre d'état système*.
+Pair the headphones in *Settings > Bluetooth & devices*; the app connects to them on its own as soon as they are
+on. Windows 11 puts new icons in the hidden area (the `^` arrow): to keep this one visible, go to
+*Settings > Personalization > Taskbar > Other system tray icons*.
 
-## Utilisation
+## Usage
 
-- **Clic gauche** sur l'icône (une pile avec le niveau de batterie du casque, rouge à 20 % et moins, vide et
-  atténuée quand le casque n'est pas connecté) : popup rapide. **Double-clic** : fenêtre principale.
-  **Clic droit** : menu (modes, micro, réglages, quitter).
-- **Relancer l'exe** (menu Démarrer, double-clic) ouvre la fenêtre principale de l'appli déjà lancée.
-- Fermer la fenêtre principale libère sa mémoire ; l'appli reste dans la zone de notification.
-- `Xm4Control.exe --log` écrit les trames échangées avec le casque dans `%LOCALAPPDATA%\Xm4Control\trace.log`.
+- **Click** the icon (a battery showing the headset's charge, red at 20 % and below, empty and dimmed when the
+  headphones aren't connected): quick flyout. **Double-click**: main window.
+  **Right-click**: menu (modes, mic, settings, quit).
+- **Running the exe again** (Start menu, double-click) opens the main window of the app already running.
+- Closing the main window frees its memory; the app stays in the tray.
+- `Xm4Control.exe --log` writes the frames exchanged with the headphones to `%LOCALAPPDATA%\Xm4Control\trace.log`.
 
-**Ligne de commande** (`xm4.exe`, aussi dans les Releases) :
+**Command line** (`xm4.exe`, also in the Releases):
 
 ```text
-xm4 status                 état du casque
-xm4 nc                     réduction de bruit
-xm4 ambient [1-20] [voix]  son ambiant
-xm4 wind | off             réduction du vent / désactivé
-xm4 eq BassBoost           préréglage d'égaliseur
+xm4 status                 headset status
+xm4 nc                     noise cancelling
+xm4 ambient [1-20] [voix]  ambient sound (level, voix = focus on voice)
+xm4 wind | off             wind noise reduction / off
+xm4 eq BassBoost           equalizer preset
 xm4 dsee|s2c|pause|autooff|touch|voice on|off
-xm4 mic off                stéréo sans micro (mic on pour revenir)
-xm4 raw 6602 -v            debug : payload brut, -v affiche les trames
+xm4 mic off                stereo without the headset mic (mic on to undo)
+xm4 list                   paired Bluetooth devices and connection state
+xm4 raw 6602 -v            debug: raw payload, -v prints the frames
 ```
 
-Le casque n'accepte qu'une connexion de contrôle par PC : quand l'appli tourne, la CLI ne peut pas se
-connecter au casque (sauf `xm4 mic` et `xm4 list`, qui passent par Windows).
+The headphones accept only one control connection per PC: while the app is running, the CLI can't connect to
+them (except `xm4 mic` and `xm4 list`, which go through Windows).
 
-## Comment ça marche
+## How it works
 
-### Le casque : protocole Sony « MDR » v1 sur RFCOMM
+### The headphones: Sony "MDR" protocol v1 over RFCOMM
 
-Le XM4 expose un service Bluetooth classique RFCOMM propriétaire, UUID `96CC203E-5068-46AD-B32D-E316F5E069BA`
-(c'est lui qu'utilise l'appli Sony). On s'y connecte avec un socket Winsock `AF_BTH` / `BTHPROTO_RFCOMM` ;
-Windows retrouve le canal par SDP à partir de l'UUID.
+The XM4 exposes a proprietary classic Bluetooth RFCOMM service, UUID `96CC203E-5068-46AD-B32D-E316F5E069BA`
+(the one the Sony app uses). The app connects to it with a Winsock `AF_BTH` / `BTHPROTO_RFCOMM` socket; Windows
+finds the channel through SDP from the UUID.
 
-Trame :
+Frame:
 
 ```text
-3E | type | séquence | longueur (4 octets, big endian) | payload | checksum | 3C
+3E | type | sequence | length (4 bytes, big endian) | payload | checksum | 3C
 ```
 
-- `type` : `0x01` ACK, `0x0C` commande, `0x0E` commande (2e jeu : guide vocal).
-- `checksum` : somme modulo 256 des octets entre `3E` et le checksum.
-- Échappement : `3C`, `3D`, `3E` dans la trame deviennent `3D` suivi de l'octet `& 0xEF`.
-- Chaque message est acquitté. Un ACK porte la séquence `1 - n` ; la commande suivante réutilise la séquence
-  du dernier ACK reçu. Le casque envoie aussi des notifications spontanées (bouton NC/AMB, batterie…).
+- `type`: `0x01` ACK, `0x0C` command, `0x0E` command (second set: voice guidance).
+- `checksum`: sum modulo 256 of the bytes between `3E` and the checksum.
+- Escaping: `3C`, `3D`, `3E` inside the frame become `3D` followed by the byte `& 0xEF`.
+- Every message is acknowledged. An ACK carries the sequence `1 - n`; the next command reuses the sequence of the
+  last ACK received. The headphones also send unsolicited notifications (NC/AMB button, battery…).
 
-Le premier octet du payload est la commande, par quadruplets GET (`n`), RET (`n+1`), SET (`n+2`), NOTIFY (`n+3`) :
+The first byte of the payload is the command, in groups of four: GET (`n`), RET (`n+1`), SET (`n+2`),
+NOTIFY (`n+3`):
 
-| Fonction | GET | SET (exemple) |
+| Function | GET | SET (example) |
 |---|---|---|
-| Init (réponse de 4 octets = protocole v1) | `00 00` | |
-| Batterie | `10 00` → `11 00 <niveau> <en charge>` | |
+| Init (4-byte reply = protocol v1) | `00 00` | |
+| Battery | `10 00` → `11 00 <level> <charging>` | |
 | Codec | `18 00` → `19 00 <codec>` | |
-| Son ambiant | `66 02` | `68 02 11 02 02 01 00 00` (réduction de bruit) |
-| Égaliseur | `56 01` | `58 01 <préréglage> 00` |
+| Ambient sound | `66 02` | `68 02 11 02 02 01 00 00` (noise cancelling) |
+| Equalizer | `56 01` | `58 01 <preset> 00` |
 | DSEE Extreme | `E6 02` | `E8 02 00 <on>` |
-| Pavé tactile | `D6 D1` | `D8 D1 01 <on>` |
-| Pause au retrait | `F6 03` | `F8 03 00 <on>` |
-| Extinction automatique | `F6 04` | `F8 04 01 10 00` (quand on ne le porte plus), `11 00` (jamais) |
+| Touch panel | `D6 D1` | `D8 D1 01 <on>` |
+| Pause when taken off | `F6 03` | `F8 03 00 <on>` |
+| Automatic power off | `F6 04` | `F8 04 01 10 00` (when taken off), `11 00` (never) |
 | Speak-to-Chat | `F6 05` | `F8 05 01 <on>` |
-| Réglages Speak-to-Chat | `FA 05` | `FC 05 00 <sensibilité> <focus voix> <délai>` |
-| Optimiseur de réduction de bruit | notifications `85 01 00 <étape>` | `84 01 00 01` (lancer), `00` (arrêter) |
-| Guide vocal (type `0x0E`) | `46 01 01` | `48 01 01 <on>` |
-| Éteindre le casque | | `22 00 01` |
+| Speak-to-Chat settings | `FA 05` | `FC 05 00 <sensitivity> <voice focus> <timeout>` |
+| NC Optimizer | notifications `85 01 00 <step>` | `84 01 00 01` (start), `00` (stop) |
+| Voice guidance (type `0x0E`) | `46 01 01` | `48 01 01 <on>` |
+| Power off the headphones | | `22 00 01` |
 
-Speak-to-Chat : sensibilité `00` auto, `01` élevée, `02` faible ; délai `00` court, `01` standard, `02` long,
-`03` jamais. Optimiseur : `01` vérification du port, `02` pression atmosphérique, `10` analyse, `11` terminé.
+Speak-to-Chat: sensitivity `00` auto, `01` high, `02` low; timeout `00` short, `01` standard, `02` long,
+`03` never. NC Optimizer: `01` checking fit, `02` atmospheric pressure, `10` analysing, `11` done.
 
-Son ambiant, `68 02 <effet> 02 <nc> 01 <voix> <niveau>` : effet `00` éteint / `11` actif ;
-nc `02` réduction de bruit, `01` vent, `00` son ambiant ; niveau de 1 à 20 (`0` en réduction de bruit).
+Ambient sound, `68 02 <effect> 02 <nc> 01 <voice> <level>`: effect `00` off / `11` on;
+nc `02` noise cancelling, `01` wind, `00` ambient sound; level 1 to 20 (`0` in noise cancelling).
 
-Particularités constatées sur un XM4 en firmware 2.9.0 :
+Quirks seen on an XM4 with firmware 2.9.0:
 
-- Juste après la connexion, le casque ignore la première trame : l'init est réémise toutes les 300 ms.
-- Speak-to-Chat répond `F7 05 00 <état>` au GET et `F9 05 01 <état>` après un SET ; `F9 05 02 ..` est un
-  autre message, ignoré.
-- Le pavé tactile est le réglage général `0xD1` : interrogé par `D0 D1`, le casque répond
-  `TOUCH_PANEL_SETTING`. Il n'expose pas `0xD2` (utilisé par Gadgetbridge) ni `0xD3`, même si `D6 D2` reçoit
-  une réponse. Valeur `01` = activé, comme les autres booléens du protocole v1.
-- Le casque n'accepte pas plusieurs connexions RFCOMM rapprochées : laisser quelques secondes entre deux
-  appels de la CLI.
+- Right after connecting, the headphones ignore the first frame: the init is resent every 300 ms.
+- Speak-to-Chat replies `F7 05 00 <state>` to the GET and `F9 05 01 <state>` after a SET; `F9 05 02 ..` is a
+  different message, ignored.
+- The touch panel is the general setting `0xD1`: asked with `D0 D1`, the headphones answer
+  `TOUCH_PANEL_SETTING`. They don't expose `0xD2` (used by Gadgetbridge) or `0xD3`, even though `D6 D2` gets a
+  reply. Value `01` = enabled, like the other booleans of protocol v1.
+- The headphones don't accept several RFCOMM connections in quick succession: leave a few seconds between two
+  CLI calls.
 
-### Le micro : profil mains libres de Windows
+### The mic: the Windows Hands-Free profile
 
-Ce n'est pas une commande du casque. Windows connecte deux profils : A2DP (stéréo, sans micro) et HFP
-(mains libres, mono avec micro). Dès qu'une appli ouvre le micro, Windows bascule sur HFP et le son se dégrade.
-L'appli active ou désactive le service HFP (`0000111E-…`) du casque avec `BluetoothSetServiceState`,
-comme la case « Téléphonie mains libres » du Panneau de configuration. Pas besoin des droits administrateur.
-Si Windows le réactive (réappairage…), l'appli le recoupe à la connexion suivante.
+This isn't a headset command. Windows connects two profiles: A2DP (stereo, no mic) and HFP (hands-free, mono with
+mic). As soon as an app opens the microphone, Windows switches to HFP and the sound gets worse. The app turns the
+headset's HFP service (`0000111E-…`) on or off with `BluetoothSetServiceState`, like the "Handsfree Telephony"
+checkbox in Control Panel. No administrator rights needed. If Windows turns it back on (re-pairing…), the app
+turns it off again on the next connection.
 
-Le casque se reconnecte au PC par ce profil quand on l'allume : micro coupé, il ne se reconnecte donc plus tout
-seul. Il faut le reconnecter depuis *Paramètres > Bluetooth et appareils*.
+The headphones reconnect to the PC through this profile when switched on: with the mic off, they no longer
+reconnect on their own. Reconnect them from *Settings > Bluetooth & devices*.
 
 ### Sources
 
-- [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) : implémentation Android du protocole Sony
+- [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge): Android implementation of the Sony protocol
   (`service/devices/sony/headphones`)
-- [SonyHeadphonesClient](https://github.com/Plutoberth/SonyHeadphonesClient) : premier client PC (archivé)
-- [omarchy-headphones, PROTOCOL.md](https://raw.githubusercontent.com/ncr/omarchy-headphones/main/PROTOCOL.md) :
-  captures sur un WH-1000XM4
+- [SonyHeadphonesClient](https://github.com/Plutoberth/SonyHeadphonesClient): the first PC client (archived)
+- [omarchy-headphones, PROTOCOL.md](https://raw.githubusercontent.com/ncr/omarchy-headphones/main/PROTOCOL.md):
+  captures from a WH-1000XM4
 
-## Développement
+## Development
 
 ```text
-src/Xm4Control.Core   protocole (trames, commandes, décodage), Bluetooth Win32, client RFCOMM
-src/Xm4Control.App    appli WinUI 3 (Windows App SDK) : popup, icône de notification (H.NotifyIcon)
-src/Xm4Control.App/Web  fenêtre principale en HTML/CSS/JS (WebView2), casque 3D avec three.js
-src/Xm4Control.Cli    outil xm4
-tests/                tests du protocole sur des trames capturées
-tools/headset-render  scripts Blender : modèle 3D allégé (Web/headset.glb) et image de secours (Web/headset.png)
+src/Xm4Control.Core   protocol (frames, commands, decoding), Win32 Bluetooth, RFCOMM client
+src/Xm4Control.App    WinUI 3 app (Windows App SDK): flyout, tray icon (H.NotifyIcon)
+src/Xm4Control.App/Web  main window in HTML/CSS/JS (WebView2), 3D headset with three.js
+src/Xm4Control.Cli    xm4 tool
+tests/                protocol tests on captured frames
+tools/headset-render  Blender scripts: lightweight 3D model (Web/headset.glb) and fallback image (Web/headset.png)
 ```
 
-Le modèle 3D et l'image se recalculent avec Blender (`winget install BlenderFoundation.Blender`), à partir du
-modèle glTF téléchargé depuis Sketchfab et décompressé dans `docs/3d/src/` (non versionné) :
+The 3D model and the image are rebuilt with Blender (`winget install BlenderFoundation.Blender`), from the glTF
+model downloaded from Sketchfab and unzipped into `docs/3d/src/` (not versioned):
 
 ```powershell
 $blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
@@ -155,32 +163,32 @@ $blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 & $blender -b -P tools/headset-render/render.py -- docs/3d/src/scene.gltf src/Xm4Control.App/Web/headset.png
 ```
 
-La page de la fenêtre principale s'ouvre aussi dans un navigateur, avec un état d'exemple, pour travailler le
-design (servir le dossier `Web` en HTTP local : les modules JS ne se chargent pas en `file://`).
+The main window page also opens in a browser, with sample data, to work on the design (serve the `Web` folder
+over local HTTP: JS modules don't load from `file://`).
 
-Prérequis : SDK .NET 10 (`winget install Microsoft.DotNet.SDK.10`). Pas besoin de Visual Studio.
+Requirements: .NET 10 SDK (`winget install Microsoft.DotNet.SDK.10`). No Visual Studio needed.
 
 ```powershell
 dotnet build
 dotnet test
 ```
 
-GitHub Actions (`.github/workflows/build.yml`) compile, teste et produit les deux exe à chaque push : ils se
-téléchargent depuis l'exécution (artefact `xm4-control`, gardé 30 jours). Pour publier une version, changer la
-version dans `Directory.Build.props`, commiter, puis pousser un tag du même numéro :
+GitHub Actions (`.github/workflows/build.yml`) builds, tests and produces both exes on every push: download them
+from the run (artifact `xm4-control`, kept 30 days). To publish a version, change the version in
+`Directory.Build.props`, commit, then push a tag with the same number:
 
 ```powershell
 git tag v2.4.0
 git push origin master v2.4.0
 ```
 
-L'action crée alors la release avec les deux exe. Ses notes listent les commits depuis la version précédente,
-suivis de la description de `.github/release-notes.md`. Si la release existe déjà (notes rédigées à la main),
-l'action y dépose seulement les exe.
+The action then creates the release with both exes. Its notes list the commits since the previous version,
+followed by the description in `.github/release-notes.md`. If the release already exists (notes written by hand),
+the action only uploads the exes.
 
-L'appli est non empaquetée (pas de MSIX), avec le runtime Windows App SDK embarqué, élaguée et compressée en un
-seul exe (environ 40 Mo, page web et modèle 3D compris) : ses fichiers sont extraits dans un dossier temporaire au
-premier lancement. Pour compiler les exe en local, comme le fait l'action :
+The app is unpackaged (no MSIX), with the Windows App SDK runtime bundled, trimmed and compressed into a single exe
+(about 40 MB, web page and 3D model included): its files are extracted to a temporary folder on first launch. To
+build the exes locally, as the action does:
 
 ```powershell
 dotnet publish src/Xm4Control.App -c Release -p:Platform=x64 -r win-x64 -o publish
@@ -188,11 +196,12 @@ dotnet publish src/Xm4Control.Cli -c Release -r win-x64 --self-contained -p:Publ
   -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
 ```
 
-## Licence
+## License
 
-[MIT](LICENSE). Projet indépendant, non affilié à Sony.
+[MIT](LICENSE). Independent project, not affiliated with Sony.
 
-Le casque en 3D (et son image) est tiré du modèle « [SONY headphone WH-1000XM4](https://sketchfab.com/3d-models/sony-headphone-wh-1000xm4-f90f76c75d8143eb97eb49844050aa26) »
-de [Chizuko V](https://sketchfab.com/chizuk0), sous licence [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
-Embarqués dans `Web/vendor` : [three.js](https://threejs.org) (MIT) et la police
-[Geist](https://vercel.com/font) (SIL Open Font License), avec leurs licences.
+The 3D headset (and its image) comes from the model
+"[SONY headphone WH-1000XM4](https://sketchfab.com/3d-models/sony-headphone-wh-1000xm4-f90f76c75d8143eb97eb49844050aa26)"
+by [Chizuko V](https://sketchfab.com/chizuk0), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+Bundled in `Web/vendor`: [three.js](https://threejs.org) (MIT) and the
+[Geist](https://vercel.com/font) font (SIL Open Font License), with their licenses.
